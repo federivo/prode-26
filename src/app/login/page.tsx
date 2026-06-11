@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { getSiteUrl } from "@/lib/site";
 import { copy } from "@/lib/copy";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -16,11 +17,9 @@ export default function LoginPage() {
     e.preventDefault();
     setStatus("sending");
     const supabase = createClient();
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${siteUrl}/auth/callback` },
+      options: { emailRedirectTo: `${getSiteUrl()}/auth/callback` },
     });
     setStatus(error ? "error" : "sent");
   }

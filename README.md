@@ -43,7 +43,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...       # secreto, solo server
 FOOTBALL_DATA_API_KEY=...           # football-data.org/client/register
 CRON_SECRET=...                     # string random largo
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=https://prode-26-red.vercel.app   # sin barra final
 ```
 
 ### 3. Correr local
@@ -71,10 +71,11 @@ Vas a ver la pestaña **Admin** con el botón para sincronizar los partidos.
 
 1. Subí el repo a GitHub e importalo en [vercel.com](https://vercel.com) (plan
    Hobby, gratis).
-2. Cargá las mismas variables de entorno; poné `NEXT_PUBLIC_SITE_URL` con la URL
-   de Vercel (`https://tu-app.vercel.app`).
-3. En Supabase **Authentication → URL Configuration**, agregá esa URL a
-   "Site URL" y "Redirect URLs" (`https://tu-app.vercel.app/auth/callback`).
+2. Cargá las mismas variables de entorno; poné `NEXT_PUBLIC_SITE_URL` =
+   `https://prode-26-red.vercel.app` (sin barra final).
+3. En Supabase **Authentication → URL Configuration**, poné en "Site URL"
+   `https://prode-26-red.vercel.app` y en "Redirect URLs"
+   `https://prode-26-red.vercel.app/auth/callback`.
 
 ## Sincronización de partidos
 
@@ -85,8 +86,8 @@ Los resultados se traen de football-data.org de tres formas (todas gratis):
 2. **Manual:** botón en la pestaña Admin.
 3. **Pinger externo (opcional):** GitHub Action que pega cada 15 min al endpoint
    `/api/cron/sync`. Ver `.github/workflows/sync.yml`. Configurá los secrets
-   `SYNC_URL` (`https://tu-app.vercel.app/api/cron/sync`) y `CRON_SECRET` en el
-   repo de GitHub.
+   `SYNC_URL` (`https://prode-26-red.vercel.app/api/cron/sync`) y `CRON_SECRET`
+   en el repo de GitHub.
 
 > No usamos Vercel Cron porque en el plan Hobby corre solo una vez por día.
 

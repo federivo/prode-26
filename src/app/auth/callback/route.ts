@@ -1,13 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 /** Completa el login del magic link: canjea el código por una sesión. */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? origin;
+  const siteUrl = getSiteUrl();
 
   if (!code) {
     return NextResponse.redirect(`${siteUrl}/login`);
