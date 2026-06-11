@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-bg: oklch(0.99 0.005 120);
+  --color-surface: oklch(1 0 0);
+  --color-fg: oklch(0.21 0.02 160);
+  --color-muted: oklch(0.55 0.02 160);
+  --color-border: oklch(0.92 0.01 160);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: oklch(0.58 0.15 155);
+  --color-primary-fg: oklch(0.99 0.01 155);
+  --color-primary-soft: oklch(0.95 0.04 155);
+
+  --color-accent: oklch(0.72 0.17 60);
+  --color-danger: oklch(0.58 0.2 25);
+
+  --color-gold: oklch(0.82 0.15 85);
+  --color-silver: oklch(0.78 0.01 250);
+  --color-bronze: oklch(0.68 0.1 55);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius: 0.75rem;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @theme {
+    --color-bg: oklch(0.18 0.015 160);
+    --color-surface: oklch(0.23 0.02 160);
+    --color-fg: oklch(0.96 0.01 160);
+    --color-muted: oklch(0.68 0.02 160);
+    --color-border: oklch(0.32 0.02 160);
+    --color-primary: oklch(0.65 0.15 155);
+    --color-primary-fg: oklch(0.15 0.02 155);
+    --color-primary-soft: oklch(0.3 0.05 155);
   }
 }
 
+* {
+  border-color: var(--color-border);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.field-num {
+  font-variant-numeric: tabular-nums;
 }

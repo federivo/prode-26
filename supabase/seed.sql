@@ -1,0 +1,9 @@
+-- Seed para desarrollo local.
+-- Los profiles se crean solos cuando un usuario se registra (trigger handle_new_user).
+-- Para darte permisos de admin de la app (sincronizar partidos), corré DESPUÉS de
+-- haber entrado al menos una vez con tu mail:
+--
+--   update profiles set is_app_admin = true
+--   where id = (select id from auth.users where email = 'federivo@gmail.com');
+--
+-- No hay nada más para seedear: los partidos se traen de la API con la sync.

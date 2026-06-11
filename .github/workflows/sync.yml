@@ -1,0 +1,20 @@
+# Pinger gratuito que sincroniza los partidos cada 15 minutos.
+# Configurá en el repo (Settings → Secrets and variables → Actions):
+#   SYNC_URL     = https://tu-app.vercel.app/api/cron/sync
+#   CRON_SECRET  = el mismo valor que tenés en Vercel
+name: Sincronizar partidos
+
+on:
+  schedule:
+    - cron: "*/15 * * * *" # cada 15 minutos (UTC)
+  workflow_dispatch: {} # permite correrlo a mano
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping al endpoint de sync
+        run: |
+          curl -sS -f \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SYNC_URL }}"
