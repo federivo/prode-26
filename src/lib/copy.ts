@@ -95,6 +95,26 @@ export const copy = {
     empty: "Todavía no hay partidos cargados. Volvé en un rato.",
   },
 
+  focus: {
+    title: "Modo Focus",
+    subtitle: "Un partido a la vez: tocá los goles de cada equipo.",
+    enter: "Modo Focus",
+    exit: "Ver lista",
+    progress: (i: number, n: number) => `Partido ${i} de ${n}`,
+    back: "Anterior",
+    next: "Siguiente",
+    finish: "Terminar",
+    saving: "Guardando…",
+    saved: "Guardado",
+    tapToPick: "Tocá los goles de cada equipo",
+    doneTitle: "¡Eso es todo!",
+    doneSubtitle:
+      "Pasaste por todos los partidos abiertos. Podés volver cuando quieras a retocar tus pronósticos.",
+    backToList: "Volver a la lista",
+    startOver: "Repasar de nuevo",
+    empty: "No hay partidos abiertos para pronosticar ahora mismo.",
+  },
+
   ranking: {
     title: "Tabla de posiciones",
     subtitle: "Se actualiza a medida que terminan los partidos.",

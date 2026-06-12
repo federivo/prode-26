@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Crosshair } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/session";
 import { syncIfStale } from "@/lib/football-data";
@@ -41,14 +43,23 @@ export default async function MatchesPage() {
 
   return (
     <div className="flex flex-col gap-7">
-      <header>
-        <p className="text-gilded text-xs font-semibold uppercase tracking-[0.18em]">
-          Mundial 2026
-        </p>
-        <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">
-          {copy.matches.title}
-        </h1>
-        <p className="mt-1.5 text-sm text-muted">{copy.matches.subtitle}</p>
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-gilded text-xs font-semibold uppercase tracking-[0.18em]">
+            Mundial 2026
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">
+            {copy.matches.title}
+          </h1>
+          <p className="mt-1.5 text-sm text-muted">{copy.matches.subtitle}</p>
+        </div>
+        <Link
+          href="/matches/focus"
+          className="bg-gilded sheen inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold tracking-tight text-primary-fg shadow-[var(--shadow-gold)] active:translate-y-px"
+        >
+          <Crosshair className="h-3.5 w-3.5" strokeWidth={2.25} />
+          {copy.focus.enter}
+        </Link>
       </header>
 
       {groups.length === 0 ? (
