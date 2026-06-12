@@ -66,6 +66,9 @@ type MatchRow = Omit<Match, "id">;
 function toRow(m: FDMatch): MatchRow {
   const status = mapStatus(m.status);
   const finished = status === "FINISHED";
+  // Guardamos el marcador también en vivo (con la demora del free tier) para
+  // mostrarlo. El ganador y los puntos solo cuando el partido termina.
+  const hasScore = finished || status === "IN_PLAY";
   return {
     external_id: m.id,
     stage: STAGE_MAP[m.stage] ?? "GROUP",
@@ -73,8 +76,8 @@ function toRow(m: FDMatch): MatchRow {
     away_team: m.awayTeam?.name ?? null,
     kickoff: m.utcDate,
     status,
-    home_score: finished ? m.score.fullTime.home : null,
-    away_score: finished ? m.score.fullTime.away : null,
+    home_score: hasScore ? m.score.fullTime.home : null,
+    away_score: hasScore ? m.score.fullTime.away : null,
     winner: finished ? mapWinner(m.score.winner) : null,
     updated_at: new Date().toISOString(),
   };

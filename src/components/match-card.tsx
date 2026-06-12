@@ -15,6 +15,8 @@ export function MatchCard({
   const locked =
     match.status !== "SCHEDULED" || new Date(match.kickoff) <= new Date();
   const finished = match.status === "FINISHED" && match.home_score !== null;
+  const liveScore =
+    match.status === "IN_PLAY" && match.home_score !== null;
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -37,6 +39,8 @@ export function MatchCard({
         <div className="shrink-0 px-1">
           {finished ? (
             <ScoreChip home={match.home_score!} away={match.away_score!} />
+          ) : liveScore ? (
+            <ScoreChip home={match.home_score!} away={match.away_score!} live />
           ) : (
             <span className="text-xs font-medium text-muted">{copy.common.vs}</span>
           )}
@@ -80,9 +84,24 @@ function Team({ name, side }: { name: string | null; side: "home" | "away" }) {
   );
 }
 
-function ScoreChip({ home, away }: { home: number; away: number }) {
+function ScoreChip({
+  home,
+  away,
+  live = false,
+}: {
+  home: number;
+  away: number;
+  live?: boolean;
+}) {
   return (
-    <span className="field-num rounded-lg bg-fg px-3 py-1 text-base font-bold text-bg">
+    <span
+      className={cn(
+        "field-num rounded-lg px-3 py-1 text-base font-bold",
+        live
+          ? "border border-danger/50 bg-danger/10 text-fg"
+          : "bg-fg text-bg",
+      )}
+    >
       {home} - {away}
     </span>
   );
