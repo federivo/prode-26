@@ -34,6 +34,7 @@ export async function proxy(request: NextRequest) {
   const isPublic =
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
+    pathname.startsWith("/join") ||
     pathname.startsWith("/api");
 
   // Sin sesión y ruta privada → al login.

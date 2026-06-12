@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/service";
 import { syncMatches } from "@/lib/football-data";
+import { joinByCode } from "@/lib/join";
 import { copy } from "@/lib/copy";
 
 export interface ActionState {
@@ -96,44 +96,23 @@ export async function createGroup(
   redirect("/groups");
 }
 
-const joinCodeSchema = z
-  .string()
-  .trim()
-  .min(4, "Código inválido.")
-  .transform((s) => s.toUpperCase());
+const joinCodeSchema = z.string().trim().min(4, "Código inválido.");
 
 export async function joinGroup(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const userId = await requireUserId();
+  await requireUserId();
   const parsed = joinCodeSchema.safeParse(formData.get("invite_code"));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Código inválido." };
   }
 
-  // El grupo no es visible vía RLS para no-miembros: resolvemos el código con
-  // service-role solo para obtener el id. La membresía se inserta como el usuario.
-  const service = createServiceClient();
-  const { data: league } = await service
-    .from("leagues")
-    .select("id")
-    .eq("invite_code", parsed.data)
-    .maybeSingle();
-  if (!league) return { error: copy.groups.invalidCode };
-
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("memberships")
-    .insert({ user_id: userId, league_id: league.id, role: "member" });
-
-  if (error) {
-    if (error.code === "23505") return { error: copy.groups.alreadyMember };
-    return { error: "No pudimos sumarte al grupo. Probá de nuevo." };
-  }
+  const result = await joinByCode(parsed.data);
+  if (result.error) return { error: result.error };
 
   revalidatePath("/groups");
-  redirect("/groups");
+  redirect(result.leagueId ? `/groups/${result.leagueId}/ranking` : "/groups");
 }
 
 // ── Pronósticos ───────────────────────────────────────────────────────────────

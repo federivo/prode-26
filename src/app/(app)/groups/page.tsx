@@ -6,6 +6,7 @@ import { copy } from "@/lib/copy";
 import { Card } from "@/components/ui/card";
 import { CreateGroupForm, JoinGroupForm } from "@/components/group-forms";
 import { CopyCode } from "@/components/copy-code";
+import { ShareLink } from "@/components/share-link";
 import { ScoringInfo } from "@/components/scoring-info";
 
 export const dynamic = "force-dynamic";
@@ -60,9 +61,10 @@ export default async function GroupsPage() {
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="mt-3 flex items-center gap-2 border-t border-border pt-3 text-sm text-muted">
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3 text-sm text-muted">
                 <span>{copy.groups.inviteCode}:</span>
                 <CopyCode code={g.invite_code} />
+                <ShareLink code={g.invite_code} />
               </div>
             </Card>
           ))}

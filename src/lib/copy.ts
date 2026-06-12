@@ -47,6 +47,8 @@ export const copy = {
     inviteCode: "Código de invitación",
     copyCode: "Copiar código",
     copied: "¡Copiado!",
+    shareLink: "Compartir link",
+    linkCopied: "¡Link copiado!",
     members: (n: number) => (n === 1 ? "1 jugador" : `${n} jugadores`),
     adminBadge: "Admin",
     viewRanking: "Ver tabla",
