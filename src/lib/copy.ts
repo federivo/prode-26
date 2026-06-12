@@ -106,10 +106,13 @@ export const copy = {
   scoring: {
     title: "Cómo se puntúa",
     exact: "Resultado exacto",
-    exactPts: "3 puntos",
+    exactPts: "10 pts",
+    outcomeOneSide: "Ganador/empate + goles de un equipo",
+    outcomeOneSidePts: "7 pts",
     outcome: "Acertar ganador o empate",
-    outcomePts: "1 punto",
-    weighted: "En las fases finales los puntos valen más.",
+    outcomePts: "5 pts",
+    oneSide: "Solo los goles de un equipo",
+    oneSidePts: "2 pts",
   },
 
   admin: {
