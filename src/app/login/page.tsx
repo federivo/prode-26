@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trophy } from "lucide-react";
+import { Trophy, Mail, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl } from "@/lib/site";
 import { copy } from "@/lib/copy";
@@ -38,9 +38,24 @@ export default function LoginPage() {
         <Card>
           <CardContent className="pt-5">
             {status === "sent" ? (
-              <p className="text-center text-sm text-fg">{copy.login.sent}</p>
+              <div className="flex flex-col items-center gap-3 py-2 text-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-primary">
+                  <MailCheck className="h-6 w-6" />
+                </span>
+                <p className="text-sm text-fg">{copy.login.sent}</p>
+              </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="flex items-start gap-2.5">
+                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <div>
+                    <h2 className="text-sm font-semibold">{copy.login.title}</h2>
+                    <p className="mt-0.5 text-sm text-muted">
+                      {copy.login.subtitle}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="email">{copy.login.emailLabel}</Label>
                   <Input
@@ -52,7 +67,9 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  <p className="text-xs text-muted">{copy.login.emailHelp}</p>
                 </div>
+
                 <Button type="submit" disabled={status === "sending"}>
                   {status === "sending" ? copy.login.sending : copy.login.submit}
                 </Button>

@@ -13,13 +13,15 @@ export const copy = {
   },
 
   login: {
-    title: "Entrá al Prode",
-    subtitle: "Te mandamos un link mágico a tu mail para entrar. Sin contraseñas.",
+    title: "Entrá con tu mail",
+    subtitle:
+      "Escribí tu mail y te mandamos un link de acceso. Lo tocás y entrás — sin contraseñas.",
     emailLabel: "Tu mail",
     emailPlaceholder: "vos@ejemplo.com",
+    emailHelp: "Te enviamos un link de acceso a este mail.",
     submit: "Enviame el link",
     sending: "Enviando…",
-    sent: "¡Listo! Revisá tu mail y hacé clic en el link para entrar.",
+    sent: "¡Listo! Revisá tu mail y tocá el link para entrar. (Puede tardar un minuto; mirá también el spam.)",
     error: "No pudimos enviar el link. Probá de nuevo.",
   },
 
