@@ -17,7 +17,6 @@ export default async function PerfilPage() {
       <Card>
         <CardContent className="flex flex-col gap-6 pt-6">
           <AvatarUpload
-            userId={session.userId}
             currentUrl={profile?.avatar_url ?? null}
             name={profile?.display_name ?? ""}
           />

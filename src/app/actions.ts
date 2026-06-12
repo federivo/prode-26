@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { syncMatches } from "@/lib/football-data";
 import { joinByCode } from "@/lib/join";
 import { copy } from "@/lib/copy";
@@ -67,23 +68,48 @@ export async function updateProfileName(
   return { ok: true };
 }
 
-/** Guarda la URL del avatar (el archivo ya se subió a Storage desde el cliente). */
-export async function setAvatarUrl(url: string): Promise<ActionState> {
+/**
+ * Sube el avatar desde el servidor (la subida desde el browser no llevaba la
+ * sesión a Storage). Usa service-role para escribir, pero la ruta se deriva del
+ * usuario autenticado, así que cada uno solo escribe su propia carpeta.
+ */
+const AVATAR_MAX = 3 * 1024 * 1024; // 3 MB
+
+export async function uploadAvatar(
+  _prev: ActionState & { url?: string },
+  formData: FormData,
+): Promise<ActionState & { url?: string }> {
   const userId = await requireUserId();
-  if (typeof url !== "string" || url.length > 500) {
-    return { error: "URL inválida." };
+  const file = formData.get("file");
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Elegí una imagen." };
   }
+  if (!file.type.startsWith("image/")) return { error: copy.perfil.notImage };
+  if (file.size > AVATAR_MAX) return { error: copy.perfil.tooBig };
+
+  const service = createServiceClient();
+  const path = `${userId}/avatar`;
+  const bytes = await file.arrayBuffer();
+
+  const { error: upErr } = await service.storage
+    .from("avatars")
+    .upload(path, bytes, { upsert: true, contentType: file.type });
+  if (upErr) return { error: copy.perfil.uploadError };
+
+  const { data } = service.storage.from("avatars").getPublicUrl(path);
+  const url = `${data.publicUrl}?v=${Date.now()}`; // cache-bust
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
     .update({ avatar_url: url })
     .eq("id", userId);
-  if (error) return { error: "No pudimos guardar tu foto. Probá de nuevo." };
+  if (error) return { error: copy.perfil.uploadError };
 
   revalidatePath("/perfil");
   revalidatePath("/groups");
-  return { ok: true };
+  return { ok: true, url };
 }
 
 // ── Grupos ────────────────────────────────────────────────────────────────────

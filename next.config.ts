@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // Las fotos de avatar (hasta 3 MB) viajan por un server action.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
 };
 
 export default nextConfig;
