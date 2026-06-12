@@ -112,6 +112,16 @@ export const copy = {
     matchCount: (n: number) => `${n} partidos cargados`,
     syncDone: (n: number) => `Listo. ${n} partidos actualizados.`,
     notAdmin: "No tenés permisos de administrador.",
+    editPredictions: "Editar pronósticos",
+    editPredictionsDesc:
+      "Cargá o corregí los pronósticos de cualquier jugador (incluso de partidos ya jugados). Útil para migrar de otra app.",
+    pickMatch: "Elegí un partido",
+    resultLabel: "Resultado",
+    notFinishedYet: "Partido sin resultado todavía",
+    savePredictions: "Guardar pronósticos",
+    savingPredictions: "Guardando…",
+    predictionsSaved: (n: number) => `Listo. ${n} pronósticos guardados.`,
+    pointsCol: "Pts",
   },
 
   stages: {

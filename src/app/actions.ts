@@ -7,7 +7,19 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { syncMatches } from "@/lib/football-data";
 import { joinByCode } from "@/lib/join";
+import { scorePrediction } from "@/lib/scoring";
 import { copy } from "@/lib/copy";
+
+async function requireAdmin(): Promise<string | null> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_app_admin")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.is_app_admin ? userId : null;
+}
 
 export interface ActionState {
   error?: string;
@@ -247,4 +259,68 @@ export async function syncNow(): Promise<ActionState & { count?: number }> {
   } catch {
     return { error: "Falló la sincronización. Revisá la API key." };
   }
+}
+
+// ── Admin: editar pronósticos (migración / correcciones) ──────────────────────
+const adminEntrySchema = z.object({
+  user_id: z.string().uuid(),
+  home_score: z.coerce.number().int().min(0).max(99),
+  away_score: z.coerce.number().int().min(0).max(99),
+});
+
+/**
+ * El admin carga/edita los pronósticos de cualquier usuario para un partido,
+ * salteando el candado de kickoff (para migrar resultados ya jugados). Recalcula
+ * los puntos si el partido ya terminó. Usa service-role (auth/escritura confiable).
+ */
+export async function adminSavePredictions(
+  matchId: string,
+  rawEntries: unknown,
+): Promise<ActionState & { saved?: number }> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+
+  if (!z.string().uuid().safeParse(matchId).success) {
+    return { error: "Partido inválido." };
+  }
+  const parsed = z.array(adminEntrySchema).safeParse(rawEntries);
+  if (!parsed.success) return { error: "Datos inválidos." };
+  if (parsed.data.length === 0) return { ok: true, saved: 0 };
+
+  const service = createServiceClient();
+  const { data: match } = await service
+    .from("matches")
+    .select("*")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (!match) return { error: "Partido no encontrado." };
+
+  const finished = match.status === "FINISHED" && match.home_score !== null;
+
+  const rows = parsed.data.map((e) => ({
+    user_id: e.user_id,
+    match_id: matchId,
+    home_score: e.home_score,
+    away_score: e.away_score,
+    points_awarded: finished
+      ? scorePrediction(
+          { homeScore: e.home_score, awayScore: e.away_score },
+          {
+            stage: match.stage,
+            homeScore: match.home_score!,
+            awayScore: match.away_score!,
+            winner: match.winner,
+          },
+        )
+      : null,
+  }));
+
+  const { error } = await service
+    .from("predictions")
+    .upsert(rows, { onConflict: "user_id,match_id" });
+  if (error) return { error: "No se pudieron guardar los pronósticos." };
+
+  revalidatePath("/admin/predictions");
+  revalidatePath("/matches");
+  return { ok: true, saved: rows.length };
 }

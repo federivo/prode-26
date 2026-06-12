@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronRight, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/session";
 import { copy } from "@/lib/copy";
@@ -43,6 +45,22 @@ export default async function AdminPage() {
           <AdminSync />
         </CardContent>
       </Card>
+
+      <Link
+        href="/admin/predictions"
+        className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 transition hover:bg-primary-soft/40"
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
+          <Pencil className="h-4 w-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">{copy.admin.editPredictions}</span>
+          <span className="block text-sm text-muted">
+            {copy.admin.editPredictionsDesc}
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-muted" />
+      </Link>
     </div>
   );
 }
