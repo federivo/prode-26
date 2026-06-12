@@ -6,6 +6,7 @@ import { requireSession } from "@/lib/session";
 import { copy } from "@/lib/copy";
 import { formatKickoff } from "@/lib/utils";
 import { AdminMatchPicker } from "@/components/admin-match-picker";
+import { AdminOpenToggle } from "@/components/admin-open-toggle";
 import {
   AdminPredictionsForm,
   type AdminUserRow,
@@ -101,16 +102,22 @@ export default async function AdminPredictionsPage({
       <AdminMatchPicker options={options} selected={matchId} />
 
       {match && (
-        <div className="rounded-xl border border-border bg-surface p-3 text-sm">
-          <span className="font-medium">
-            {match.home_team} vs {match.away_team}
-          </span>
-          <span className="ml-2 text-muted">
-            {finished
-              ? `${copy.admin.resultLabel}: ${match.home_score}-${match.away_score}`
-              : copy.admin.notFinishedYet}
-          </span>
-        </div>
+        <>
+          <div className="rounded-xl border border-border bg-surface p-3 text-sm">
+            <span className="font-medium">
+              {match.home_team} vs {match.away_team}
+            </span>
+            <span className="ml-2 text-muted">
+              {finished
+                ? `${copy.admin.resultLabel}: ${match.home_score}-${match.away_score}`
+                : copy.admin.notFinishedYet}
+            </span>
+          </div>
+          <AdminOpenToggle
+            matchId={match.id}
+            initialOpen={match.predictions_open}
+          />
+        </>
       )}
 
       {match && rows.length > 0 ? (

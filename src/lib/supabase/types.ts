@@ -48,6 +48,7 @@ export type Match = {
   home_score: number | null;
   away_score: number | null;
   winner: MatchWinner | null;
+  predictions_open: boolean;
   updated_at: string;
 }
 

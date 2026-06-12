@@ -61,7 +61,8 @@ interface FDMatch {
   };
 }
 
-type MatchRow = Omit<Match, "id">;
+// Omitimos predictions_open: lo maneja el admin, la sync no debe pisarlo.
+type MatchRow = Omit<Match, "id" | "predictions_open">;
 
 function toRow(m: FDMatch): MatchRow {
   const status = mapStatus(m.status);

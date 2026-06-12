@@ -12,8 +12,10 @@ export function MatchCard({
   match: Match;
   prediction: Prediction | null;
 }) {
-  const locked =
+  const started =
     match.status !== "SCHEDULED" || new Date(match.kickoff) <= new Date();
+  // El admin puede "abrir" un partido ya jugado para que cargues tu pronóstico.
+  const editable = !started || match.predictions_open;
   const finished = match.status === "FINISHED" && match.home_score !== null;
   const liveScore =
     match.status === "IN_PLAY" && match.home_score !== null;
@@ -29,7 +31,7 @@ export function MatchCard({
           ) : (
             formatTime(match.kickoff)
           )}
-          {locked && match.status === "SCHEDULED" && <Lock className="h-3 w-3" />}
+          {!editable && match.status === "SCHEDULED" && <Lock className="h-3 w-3" />}
         </span>
       </div>
 
@@ -37,7 +39,9 @@ export function MatchCard({
       <div className="flex items-center gap-2">
         <Team name={match.home_team} side="home" />
         <div className="shrink-0 px-1">
-          {finished ? (
+          {editable ? (
+            <span className="text-xs font-medium text-muted">{copy.common.vs}</span>
+          ) : finished ? (
             <ScoreChip home={match.home_score!} away={match.away_score!} />
           ) : liveScore ? (
             <ScoreChip home={match.home_score!} away={match.away_score!} live />
@@ -49,19 +53,24 @@ export function MatchCard({
       </div>
 
       {/* Control: input editable, pronóstico cerrado, o resultado final */}
-      {finished ? (
-        <FinishedFooter prediction={prediction} />
-      ) : locked ? (
-        <div className="mt-3 flex justify-center">
-          <LockedPrediction prediction={prediction} />
-        </div>
-      ) : (
-        <div className="mt-3 flex justify-center">
+      {editable ? (
+        <div className="mt-3 flex flex-col items-center gap-1.5">
+          {match.predictions_open && started && (
+            <span className="text-xs font-medium text-accent">
+              {copy.matches.openHint}
+            </span>
+          )}
           <PredictionInput
             matchId={match.id}
             initialHome={prediction?.home_score ?? null}
             initialAway={prediction?.away_score ?? null}
           />
+        </div>
+      ) : finished ? (
+        <FinishedFooter prediction={prediction} />
+      ) : (
+        <div className="mt-3 flex justify-center">
+          <LockedPrediction prediction={prediction} />
         </div>
       )}
     </div>

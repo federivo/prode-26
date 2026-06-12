@@ -229,6 +229,31 @@ export async function savePrediction(
     return { error: "El partido ya empezó: el pronóstico está cerrado." };
   }
 
+  // Si el partido ya terminó (caso de un partido "abierto" para migrar), le
+  // calculamos los puntos en el momento para que la tabla se actualice ya.
+  const service = createServiceClient();
+  const { data: match } = await service
+    .from("matches")
+    .select("stage, status, home_score, away_score, winner")
+    .eq("id", parsed.data.match_id)
+    .maybeSingle();
+  if (match && match.status === "FINISHED" && match.home_score !== null) {
+    const points = scorePrediction(
+      { homeScore: parsed.data.home_score, awayScore: parsed.data.away_score },
+      {
+        stage: match.stage,
+        homeScore: match.home_score,
+        awayScore: match.away_score!,
+        winner: match.winner,
+      },
+    );
+    await service
+      .from("predictions")
+      .update({ points_awarded: points })
+      .eq("user_id", userId)
+      .eq("match_id", parsed.data.match_id);
+  }
+
   revalidatePath("/matches");
   return { ok: true };
 }
@@ -323,6 +348,29 @@ export async function adminSavePredictions(
   revalidatePath("/admin/predictions");
   revalidatePath("/matches");
   return { ok: true, saved: rows.length };
+}
+
+/** Abre/cierra un partido para que los jugadores carguen su pronóstico. */
+export async function adminSetPredictionsOpen(
+  matchId: string,
+  open: boolean,
+): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+  if (!z.string().uuid().safeParse(matchId).success) {
+    return { error: "Partido inválido." };
+  }
+
+  const service = createServiceClient();
+  const { error } = await service
+    .from("matches")
+    .update({ predictions_open: open })
+    .eq("id", matchId);
+  if (error) return { error: "No se pudo actualizar." };
+
+  revalidatePath("/admin/predictions");
+  revalidatePath("/matches");
+  return { ok: true };
 }
 
 // ── Admin: gestión de usuarios ────────────────────────────────────────────────

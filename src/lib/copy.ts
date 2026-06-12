@@ -80,6 +80,7 @@ export const copy = {
     points: (n: number) => (n === 1 ? "1 punto" : `${n} puntos`),
     noPrediction: "Sin pronóstico",
     closesAt: "Cierra al empezar el partido",
+    openHint: "Abierto para cargar tu pronóstico",
     empty: "Todavía no hay partidos cargados. Volvé en un rato.",
   },
 
@@ -149,6 +150,9 @@ export const copy = {
       `¿Borrar a ${name}? Se borran también sus pronósticos. No se puede deshacer.`,
     you: "vos",
     noEmail: "(sin mail)",
+    openForPlayers: "Abierto para que los jugadores carguen su pronóstico",
+    openForPlayersHint:
+      "Activalo para que cada uno complete su pronóstico de este partido (aunque ya se haya jugado).",
   },
 
   stages: {
