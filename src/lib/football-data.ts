@@ -1,5 +1,5 @@
 import "server-only";
-import { createServiceClient } from "@/lib/supabase/service";
+import { createServiceClient, isServiceConfigured } from "@/lib/supabase/service";
 import { scorePrediction } from "@/lib/scoring";
 import type {
   Match,
@@ -97,6 +97,12 @@ export interface SyncResult {
  * SOLO server-only: usa la service-role key (saltea RLS).
  */
 export async function syncMatches(): Promise<SyncResult> {
+  if (!isServiceConfigured()) {
+    throw new Error(
+      "Falta configurar SUPABASE_SERVICE_ROLE_KEY (revisá tu .env.local).",
+    );
+  }
+
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
   if (!apiKey) throw new Error("Falta FOOTBALL_DATA_API_KEY");
 
@@ -166,6 +172,10 @@ const STALE_MS = 15 * 60 * 1000; // 15 minutos
  * No lanza: si falla, la página igual se muestra con lo que haya en la DB.
  */
 export async function syncIfStale(): Promise<void> {
+  // Sin service-role key (p. ej. dev local recién clonado) no hay sync posible:
+  // mostramos lo que haya en la DB sin ensuciar la consola con errores.
+  if (!isServiceConfigured()) return;
+
   try {
     const supabase = createServiceClient();
     const { data } = await supabase

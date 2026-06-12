@@ -1,12 +1,21 @@
 @import "tailwindcss";
 
-/* Las utilidades referencian variables que cambian según el tema (inline). */
+/* ===========================================================================
+   Casa de Oro — sistema visual "trofeo dorado" para el Prode Mundial 2026.
+   Oro como protagonista en ambos temas. Claro = champagne/marfil, oscuro =
+   vitrina de trofeos de noche. Tipografía editorial (Fraunces) + cuerpo cálido
+   (Hanken Grotesk).
+   =========================================================================== */
+
+/* Las utilidades de Tailwind referencian variables que cambian según el tema. */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-hairline: var(--hairline);
 
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
@@ -14,43 +23,68 @@
 
   --color-accent: var(--accent);
   --color-danger: var(--danger);
+  --color-live: var(--live);
 
   --color-gold: var(--gold);
   --color-silver: var(--silver);
   --color-bronze: var(--bronze);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-hanken), ui-monospace, monospace;
 
-  --radius: 0.75rem;
+  --radius: 0.875rem;
+
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -12px oklch(0 0 0 / 0.18);
+  --shadow-gold: 0 8px 30px -10px oklch(0.78 0.14 85 / 0.45);
 }
 
+/* ── Paleta ─────────────────────────────────────────────────────────────── */
 :root {
-  /* Paleta oscura (definida una sola vez). */
-  --d-bg: oklch(0.18 0.015 160);
-  --d-surface: oklch(0.23 0.02 160);
-  --d-fg: oklch(0.96 0.01 160);
-  --d-muted: oklch(0.68 0.02 160);
-  --d-border: oklch(0.32 0.02 160);
-  --d-primary: oklch(0.65 0.15 155);
-  --d-primary-fg: oklch(0.15 0.02 155);
-  --d-primary-soft: oklch(0.3 0.05 155);
+  /* Tema oscuro (la vitrina) — definido una sola vez, se activa más abajo. */
+  --d-bg: oklch(0.165 0.014 70);
+  --d-surface: oklch(0.205 0.016 72);
+  --d-surface-2: oklch(0.245 0.02 74);
+  --d-fg: oklch(0.955 0.014 85);
+  --d-muted: oklch(0.72 0.025 80);
+  --d-border: oklch(0.32 0.022 78);
+  --d-hairline: oklch(0.82 0.12 86 / 0.22);
+  --d-primary: oklch(0.82 0.135 86);
+  --d-primary-fg: oklch(0.2 0.03 75);
+  --d-primary-soft: oklch(0.3 0.05 84);
+  --d-accent: oklch(0.7 0.13 162);
+  --d-danger: oklch(0.64 0.2 25);
+  --d-live: oklch(0.68 0.21 22);
 
-  /* Activas = claro por defecto. */
-  --bg: oklch(0.99 0.005 120);
-  --surface: oklch(1 0 0);
-  --fg: oklch(0.21 0.02 160);
-  --muted: oklch(0.55 0.02 160);
-  --border: oklch(0.92 0.01 160);
-  --primary: oklch(0.58 0.15 155);
-  --primary-fg: oklch(0.99 0.01 155);
-  --primary-soft: oklch(0.95 0.04 155);
+  /* Tema claro (champagne) — activo por defecto. */
+  --bg: oklch(0.985 0.01 88);
+  --surface: oklch(1 0.004 90);
+  --surface-2: oklch(0.975 0.012 86);
+  --fg: oklch(0.23 0.022 70);
+  --muted: oklch(0.52 0.025 72);
+  --border: oklch(0.9 0.016 84);
+  --hairline: oklch(0.72 0.13 82 / 0.5);
+  --primary: oklch(0.72 0.14 80);
+  --primary-fg: oklch(0.99 0.012 90);
+  --primary-soft: oklch(0.93 0.05 86);
+  --accent: oklch(0.55 0.12 162);
+  --danger: oklch(0.55 0.2 25);
+  --live: oklch(0.58 0.22 22);
 
-  --accent: oklch(0.72 0.17 60);
-  --danger: oklch(0.58 0.2 25);
-  --gold: oklch(0.82 0.15 85);
-  --silver: oklch(0.78 0.01 250);
+  /* Podio — constantes en ambos temas. */
+  --gold: oklch(0.82 0.15 86);
+  --silver: oklch(0.8 0.012 250);
   --bronze: oklch(0.68 0.1 55);
+
+  /* Gradiente metálico (pan de oro). */
+  --metal-gold: linear-gradient(
+    135deg,
+    oklch(0.9 0.1 95) 0%,
+    oklch(0.82 0.15 88) 28%,
+    oklch(0.72 0.15 78) 52%,
+    oklch(0.86 0.12 92) 70%,
+    oklch(0.64 0.13 64) 100%
+  );
 
   color-scheme: light;
 }
@@ -60,12 +94,17 @@
   color-scheme: dark;
   --bg: var(--d-bg);
   --surface: var(--d-surface);
+  --surface-2: var(--d-surface-2);
   --fg: var(--d-fg);
   --muted: var(--d-muted);
   --border: var(--d-border);
+  --hairline: var(--d-hairline);
   --primary: var(--d-primary);
   --primary-fg: var(--d-primary-fg);
   --primary-soft: var(--d-primary-soft);
+  --accent: var(--d-accent);
+  --danger: var(--d-danger);
+  --live: var(--d-live);
 }
 
 /* Oscuro según el sistema (salvo que el usuario haya elegido claro). */
@@ -74,26 +113,240 @@
     color-scheme: dark;
     --bg: var(--d-bg);
     --surface: var(--d-surface);
+    --surface-2: var(--d-surface-2);
     --fg: var(--d-fg);
     --muted: var(--d-muted);
     --border: var(--d-border);
+    --hairline: var(--d-hairline);
     --primary: var(--d-primary);
     --primary-fg: var(--d-primary-fg);
     --primary-soft: var(--d-primary-soft);
+    --accent: var(--d-accent);
+    --danger: var(--d-danger);
+    --live: var(--d-live);
   }
 }
 
+/* ── Base ───────────────────────────────────────────────────────────────── */
 * {
   border-color: var(--color-border);
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
+  position: relative;
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv05";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Atmósfera: resplandor dorado tenue arriba + viñeta cálida. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 60% at 50% -10%,
+      oklch(0.82 0.14 86 / 0.16),
+      transparent 60%
+    ),
+    radial-gradient(
+      90% 50% at 100% 110%,
+      oklch(0.7 0.13 70 / 0.08),
+      transparent 60%
+    );
+}
+
+/* Grano de película muy sutil sobre todo (no intercepta clics). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: oklch(0.82 0.14 86 / 0.3);
+}
+
+/* Tipografía de títulos. */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }
 
 .field-num {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ── Acabados dorados ───────────────────────────────────────────────────── */
+
+/* Texto con pan de oro. */
+.text-gilded {
+  background: var(--metal-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Relleno metálico (botones / chips destacados). */
+.bg-gilded {
+  background: var(--metal-gold);
+  color: var(--primary-fg);
+}
+
+/* Borde dorado "filo de copa" (hairline superior en las tarjetas oscuras). */
+.gilded-edge {
+  position: relative;
+}
+.gilded-edge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    var(--hairline),
+    transparent 40%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Brillo que barre (hover de CTA, campeón). */
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    oklch(1 0 0 / 0.45),
+    transparent
+  );
+  transform: skewX(-18deg);
+  transition: left 0.7s ease;
+}
+.sheen:hover::after {
+  left: 150%;
+}
+
+/* ── Animaciones ────────────────────────────────────────────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float-crown {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(3deg);
+  }
+}
+
+@keyframes pulse-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Revelado escalonado: aplicar .stagger al contenedor. */
+.stagger > * {
+  animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.04s; }
+.stagger > *:nth-child(2) { animation-delay: 0.09s; }
+.stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.stagger > *:nth-child(4) { animation-delay: 0.19s; }
+.stagger > *:nth-child(5) { animation-delay: 0.24s; }
+.stagger > *:nth-child(6) { animation-delay: 0.29s; }
+.stagger > *:nth-child(7) { animation-delay: 0.34s; }
+.stagger > *:nth-child(8) { animation-delay: 0.39s; }
+.stagger > *:nth-child(9) { animation-delay: 0.44s; }
+.stagger > *:nth-child(10) { animation-delay: 0.49s; }
+.stagger > *:nth-child(n + 11) { animation-delay: 0.54s; }
+
+.dot-live {
+  animation: pulse-live 1.4s ease-in-out infinite;
+}
+
+/* ── Accesibilidad: respetar reduce-motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .stagger > * {
+    animation: none;
+  }
+}
+
+/* Scrollbar discreto y cálido. */
+* {
+  scrollbar-color: var(--border) transparent;
 }

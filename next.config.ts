@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        // Banderas de los países (servidas como imagen, no emoji).
+        protocol: "https",
+        hostname: "flagcdn.com",
+      },
     ],
   },
   experimental: {

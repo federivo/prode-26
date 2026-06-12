@@ -8,7 +8,11 @@ export const Input = React.forwardRef<
   <input
     ref={ref}
     className={cn(
-      "h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm text-fg placeholder:text-muted/70 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50",
+      "h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-[0.95rem] text-fg",
+      "placeholder:text-muted/60 transition duration-200",
+      "hover:border-primary/40",
+      "focus-visible:border-primary/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+      "disabled:opacity-50",
       className,
     )}
     {...props}
@@ -22,7 +26,10 @@ export function Label({
 }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("text-sm font-medium text-fg", className)}
+      className={cn(
+        "text-sm font-medium tracking-tight text-fg",
+        className,
+      )}
       {...props}
     />
   );

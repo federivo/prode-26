@@ -19,7 +19,9 @@ export default async function AppLayout({
         isAdmin={session.profile.is_app_admin}
         avatarUrl={session.profile.avatar_url}
       />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 pb-24">
+        {children}
+      </main>
     </>
   );
 }

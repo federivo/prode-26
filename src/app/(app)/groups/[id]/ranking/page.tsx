@@ -111,7 +111,12 @@ export default async function RankingPage({
           <ChevronLeft className="h-4 w-4" />
           {copy.nav.groups}
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">{league.name}</h1>
+        <p className="text-gilded text-xs font-semibold uppercase tracking-[0.18em]">
+          {copy.ranking.title}
+        </p>
+        <h1 className="mt-0.5 font-display text-3xl font-semibold tracking-tight">
+          {league.name}
+        </h1>
         <p className="mt-1 text-sm text-muted">{copy.ranking.subtitle}</p>
       </div>
 

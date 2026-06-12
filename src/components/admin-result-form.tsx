@@ -59,8 +59,10 @@ export function AdminResultForm({
     : null;
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-3">
-      <p className="mb-1 text-sm font-medium">{copy.admin.resultTitle}</p>
+    <div className="gilded-edge overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-soft)]">
+      <p className="mb-1 font-display text-base font-semibold tracking-tight">
+        {copy.admin.resultTitle}
+      </p>
       <p className="mb-3 text-xs text-muted">{copy.admin.resultHint}</p>
 
       <div className="flex items-center gap-2">
@@ -109,7 +111,7 @@ function Score({
       max={99}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="field-num h-9 w-12 rounded-lg border border-border bg-surface text-center text-base font-semibold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="field-num h-11 w-14 rounded-xl border border-border bg-surface-2 text-center font-display text-lg font-semibold text-fg transition hover:border-primary/40 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     />
   );
 }

@@ -31,7 +31,12 @@ export function AvatarUpload({
         className="group relative rounded-full"
         aria-label={copy.perfil.changePhoto}
       >
-        <Avatar url={preview} name={name} size={96} />
+        <Avatar
+          url={preview}
+          name={name}
+          size={96}
+          className="ring-2 ring-primary/30 ring-offset-2 ring-offset-surface transition group-hover:ring-primary/60"
+        />
         <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
           {pending ? (
             <Loader2 className="h-6 w-6 animate-spin text-white" />

@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/session";
 import { copy } from "@/lib/copy";
-import { formatKickoff } from "@/lib/utils";
-import { flagEmoji } from "@/lib/flags";
+import { cn, formatKickoff } from "@/lib/utils";
+import { Flag } from "@/components/flag";
 import { Avatar } from "@/components/avatar";
 import type { MatchStage, MatchStatus, MatchWinner } from "@/lib/supabase/types";
 
@@ -77,35 +77,43 @@ export default async function PlayerPage({
   const total = items.reduce((s, p) => s + (p.points_awarded ?? 0), 0);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div>
         <Link
           href={`/groups/${id}/ranking`}
-          className="mb-2 inline-flex items-center gap-1 text-sm text-muted transition hover:text-fg"
+          className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition hover:text-fg"
         >
           <ChevronLeft className="h-4 w-4" />
           {copy.player.backToRanking}
         </Link>
 
-        <div className="flex items-center gap-3">
-          <Avatar url={profile.avatar_url} name={profile.display_name} size={52} />
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+        <div className="gilded-edge relative flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-soft)]">
+          <Avatar
+            url={profile.avatar_url}
+            name={profile.display_name}
+            size={60}
+            className="ring-2 ring-primary/30 ring-offset-2 ring-offset-bg"
+          />
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-2xl font-semibold tracking-tight">
               {profile.display_name}
             </h1>
-            <p className="text-sm text-muted">
-              {copy.player.totalPoints(total)} · {copy.player.subtitle}
+            <p className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 text-sm text-muted">
+              <span className="field-num text-gilded font-display text-lg font-semibold">
+                {copy.player.totalPoints(total)}
+              </span>
+              <span>· {copy.player.subtitle}</span>
             </p>
           </div>
         </div>
       </div>
 
       {items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">
+        <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted">
           {copy.player.empty}
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="stagger flex flex-col gap-2.5">
           {items.map((p) => (
             <PlayerPredictionRow key={p.matches!.id} pred={p} />
           ))}
@@ -119,51 +127,57 @@ function PlayerPredictionRow({ pred }: { pred: PredWithMatch }) {
   const m = pred.matches!;
   const finished = m.status === "FINISHED" && m.home_score !== null;
   const points = pred.points_awarded ?? 0;
+  const exact = points >= 10;
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="mb-2 flex items-center justify-between text-xs text-muted">
-        <span>{copy.stages[m.stage] ?? m.stage}</span>
-        <span>{formatKickoff(m.kickoff)}</span>
+    <article className="gilded-edge relative overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-soft)]">
+      <div className="mb-3 flex items-center justify-between text-xs">
+        <span className="rounded-full bg-surface-2 px-2.5 py-0.5 font-semibold uppercase tracking-[0.08em] text-muted">
+          {copy.stages[m.stage] ?? m.stage}
+        </span>
+        <span className="field-num text-muted">{formatKickoff(m.kickoff)}</span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <span className="flex min-w-0 items-center justify-end gap-1.5 text-right font-medium">
-          {flagEmoji(m.home_team) && (
-            <span className="shrink-0">{flagEmoji(m.home_team)}</span>
-          )}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2.5">
+        <span className="flex min-w-0 items-center justify-end gap-2 text-right text-[0.95rem] font-semibold tracking-tight">
           <span className="truncate">{m.home_team ?? "?"}</span>
+          <Flag name={m.home_team} size={28} />
         </span>
 
-        <span className="field-num shrink-0 rounded-lg bg-fg px-2.5 py-0.5 text-sm font-bold text-bg">
-          {finished ? `${m.home_score} - ${m.away_score}` : "vs"}
+        <span className="field-num shrink-0 rounded-xl border border-border bg-surface-2 px-3 py-1 font-display text-lg font-semibold leading-none text-fg">
+          {finished ? `${m.home_score} - ${m.away_score}` : copy.common.vs}
         </span>
 
-        <span className="flex min-w-0 items-center gap-1.5 font-medium">
+        <span className="flex min-w-0 items-center gap-2 text-[0.95rem] font-semibold tracking-tight">
+          <Flag name={m.away_team} size={28} />
           <span className="truncate">{m.away_team ?? "?"}</span>
-          {flagEmoji(m.away_team) && (
-            <span className="shrink-0">{flagEmoji(m.away_team)}</span>
-          )}
         </span>
       </div>
 
-      <div className="mt-3 flex items-center justify-center gap-2 border-t border-border pt-2 text-sm">
+      <div className="mt-3.5 flex items-center justify-center gap-2 border-t border-border pt-3 text-sm">
         <span className="text-muted">
-          {copy.player.prediction}: {pred.home_score}-{pred.away_score}
+          {copy.player.prediction}:{" "}
+          <span className="field-num font-semibold text-fg">
+            {pred.home_score}-{pred.away_score}
+          </span>
         </span>
         {finished && (
           <span
-            className={
-              points > 0
-                ? "rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-fg"
-                : "rounded-full bg-border px-2 py-0.5 text-xs font-semibold text-muted"
-            }
+            className={cn(
+              "field-num inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold",
+              exact
+                ? "bg-gilded text-primary-fg shadow-[var(--shadow-gold)]"
+                : points > 0
+                  ? "bg-primary-soft/70 text-fg ring-1 ring-primary/30"
+                  : "bg-surface-2 text-muted",
+            )}
           >
+            {exact && <Star className="h-3 w-3 fill-current" />}
             {points > 0 ? "+" : ""}
             {copy.matches.points(points)}
           </span>
         )}
       </div>
-    </div>
+    </article>
   );
 }
