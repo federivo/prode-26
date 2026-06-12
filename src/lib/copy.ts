@@ -165,6 +165,14 @@ export const copy = {
     openForPlayers: "Abierto para que los jugadores carguen su pronóstico",
     openForPlayersHint:
       "Activalo para que cada uno complete su pronóstico de este partido (aunque ya se haya jugado).",
+    resultTitle: "Resultado del partido",
+    resultHint:
+      "Si la API todavía no lo actualizó, cargalo a mano. Cuando llegue de la API, se usa el de la API.",
+    saveResult: "Guardar resultado",
+    clearResult: "Limpiar (que lo traiga la API)",
+    resultSaved: "Resultado guardado.",
+    resultFromApi: "Vino de la API.",
+    resultFromManual: "Cargado a mano (la API lo va a pisar cuando lo tenga).",
   },
 
   stages: {

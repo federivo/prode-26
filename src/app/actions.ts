@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { syncMatches } from "@/lib/football-data";
 import { joinByCode } from "@/lib/join";
-import { scorePrediction } from "@/lib/scoring";
+import { scorePrediction, type MatchResult } from "@/lib/scoring";
 import { isPrankster } from "@/lib/easter-egg";
 import { copy } from "@/lib/copy";
 
@@ -433,6 +433,125 @@ export async function adminSetPredictionsOpen(
 
   revalidatePath("/admin/predictions");
   revalidatePath("/matches");
+  return { ok: true };
+}
+
+// ── Admin: resultado manual (antes de que llegue de la API) ───────────────────
+const resultSchema = z.object({
+  home: z.coerce.number().int().min(0).max(99),
+  away: z.coerce.number().int().min(0).max(99),
+});
+
+/** Recalcula los puntos de todos los pronósticos de un partido ya terminado. */
+async function rescoreOneMatch(
+  service: ReturnType<typeof createServiceClient>,
+  matchId: string,
+  result: MatchResult,
+) {
+  const { data: preds } = await service
+    .from("predictions")
+    .select("id, home_score, away_score")
+    .eq("match_id", matchId);
+  for (const p of preds ?? []) {
+    const points = scorePrediction(
+      { homeScore: p.home_score, awayScore: p.away_score },
+      result,
+    );
+    await service
+      .from("predictions")
+      .update({ points_awarded: points })
+      .eq("id", p.id);
+  }
+}
+
+/**
+ * El admin carga el resultado a mano. Marca manual_result=true para que la sync
+ * no lo pise hasta que la API tenga su propio FINISHED (ahí la API manda).
+ */
+export async function adminSetMatchResult(
+  matchId: string,
+  home: number,
+  away: number,
+): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+  if (!z.string().uuid().safeParse(matchId).success) {
+    return { error: "Partido inválido." };
+  }
+  const parsed = resultSchema.safeParse({ home, away });
+  if (!parsed.success) return { error: "Resultado inválido." };
+
+  const service = createServiceClient();
+  const { data: match } = await service
+    .from("matches")
+    .select("stage")
+    .eq("id", matchId)
+    .maybeSingle();
+  if (!match) return { error: "Partido no encontrado." };
+
+  const winner: "HOME" | "AWAY" | "DRAW" =
+    parsed.data.home > parsed.data.away
+      ? "HOME"
+      : parsed.data.away > parsed.data.home
+        ? "AWAY"
+        : "DRAW";
+
+  const { error } = await service
+    .from("matches")
+    .update({
+      home_score: parsed.data.home,
+      away_score: parsed.data.away,
+      winner,
+      status: "FINISHED",
+      manual_result: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", matchId);
+  if (error) return { error: "No se pudo guardar el resultado." };
+
+  await rescoreOneMatch(service, matchId, {
+    stage: match.stage,
+    homeScore: parsed.data.home,
+    awayScore: parsed.data.away,
+    winner,
+  });
+
+  revalidatePath("/matches");
+  revalidatePath("/admin/predictions");
+  return { ok: true };
+}
+
+/** Borra el resultado manual y deja que la API lo traiga en la próxima sync. */
+export async function adminClearMatchResult(
+  matchId: string,
+): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+  if (!z.string().uuid().safeParse(matchId).success) {
+    return { error: "Partido inválido." };
+  }
+
+  const service = createServiceClient();
+  const { error } = await service
+    .from("matches")
+    .update({
+      status: "SCHEDULED",
+      home_score: null,
+      away_score: null,
+      winner: null,
+      manual_result: false,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", matchId);
+  if (error) return { error: "No se pudo limpiar el resultado." };
+
+  await service
+    .from("predictions")
+    .update({ points_awarded: null })
+    .eq("match_id", matchId);
+
+  revalidatePath("/matches");
+  revalidatePath("/admin/predictions");
   return { ok: true };
 }
 

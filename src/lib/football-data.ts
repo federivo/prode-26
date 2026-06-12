@@ -61,8 +61,9 @@ interface FDMatch {
   };
 }
 
-// Omitimos predictions_open: lo maneja el admin, la sync no debe pisarlo.
-type MatchRow = Omit<Match, "id" | "predictions_open">;
+// Omitimos predictions_open y manual_result: los maneja el admin, la sync no
+// debe pisarlos directamente desde toRow.
+type MatchRow = Omit<Match, "id" | "predictions_open" | "manual_result">;
 
 function toRow(m: FDMatch): MatchRow {
   const status = mapStatus(m.status);
@@ -114,10 +115,27 @@ export async function syncMatches(): Promise<SyncResult> {
 
   const supabase = createServiceClient();
 
-  // Upsert por external_id.
+  // Resultados cargados a mano: no los pisamos hasta que la API tenga el suyo.
+  const { data: existing } = await supabase
+    .from("matches")
+    .select("external_id, manual_result")
+    .in(
+      "external_id",
+      rows.map((r) => r.external_id),
+    );
+  const manualPending = new Set(
+    (existing ?? []).filter((e) => e.manual_result).map((e) => e.external_id),
+  );
+
+  // Si la API ya lo dio por FINISHED, su resultado manda (y limpia el flag).
+  // Si todavía no terminó y hay un resultado manual, lo salteamos.
+  const toUpsert = rows
+    .filter((r) => !(r.status !== "FINISHED" && manualPending.has(r.external_id)))
+    .map((r) => ({ ...r, manual_result: false }));
+
   const { error: upsertErr } = await supabase
     .from("matches")
-    .upsert(rows, { onConflict: "external_id" });
+    .upsert(toUpsert, { onConflict: "external_id" });
   if (upsertErr) throw new Error(`Error al guardar partidos: ${upsertErr.message}`);
 
   // Marca de tiempo de sincronización.

@@ -7,6 +7,7 @@ import { copy } from "@/lib/copy";
 import { formatKickoff } from "@/lib/utils";
 import { AdminMatchPicker } from "@/components/admin-match-picker";
 import { AdminOpenToggle } from "@/components/admin-open-toggle";
+import { AdminResultForm } from "@/components/admin-result-form";
 import {
   AdminPredictionsForm,
   type AdminUserRow,
@@ -113,6 +114,13 @@ export default async function AdminPredictionsPage({
                 : copy.admin.notFinishedYet}
             </span>
           </div>
+          <AdminResultForm
+            matchId={match.id}
+            initialHome={match.home_score}
+            initialAway={match.away_score}
+            finished={match.status === "FINISHED" && match.home_score !== null}
+            manual={match.manual_result}
+          />
           <AdminOpenToggle
             matchId={match.id}
             initialOpen={match.predictions_open}
