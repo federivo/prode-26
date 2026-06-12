@@ -1,6 +1,6 @@
 # Pinger gratuito que sincroniza los partidos cada 15 minutos.
-# Configurá en el repo (Settings → Secrets and variables → Actions):
-#   SYNC_URL     = https://tu-app.vercel.app/api/cron/sync
+# Configurá en el repo (Settings → Secrets and variables → Actions → New repository secret):
+#   SYNC_URL     = https://prode-26-red.vercel.app/api/cron/sync
 #   CRON_SECRET  = el mismo valor que tenés en Vercel
 name: Sincronizar partidos
 
@@ -13,8 +13,22 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Verificar que los secrets estén configurados
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$SYNC_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::error::Faltan los secrets SYNC_URL y/o CRON_SECRET."
+            echo "Agregalos en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
       - name: Ping al endpoint de sync
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           curl -sS -f \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.SYNC_URL }}"
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${SYNC_URL}"
