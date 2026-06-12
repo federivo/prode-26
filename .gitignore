@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Seeders locales de prueba (no commitear)
 /seeders/
+
+# Imágenes sueltas en la raíz (capturas, etc.) — no commitear
+/*.png
