@@ -68,6 +68,15 @@ export const copy = {
     uploadError: "No se pudo subir la foto. Probá de nuevo.",
   },
 
+  easterEgg: {
+    badge: "Bromista",
+    title: "Poder de Bromista 🃏",
+    desc: "Tenés un don único: podés cambiarle la foto a cualquiera de tus grupos. Usalo con sabiduría… o no 😈",
+    empty: "Todavía no compartís grupo con nadie a quien embromar.",
+    change: "Cambiar foto",
+    changing: "Cambiando…",
+  },
+
   matches: {
     title: "Partidos",
     subtitle: "Cargá tu resultado antes de que empiece cada partido.",

@@ -8,6 +8,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { syncMatches } from "@/lib/football-data";
 import { joinByCode } from "@/lib/join";
 import { scorePrediction } from "@/lib/scoring";
+import { isPrankster } from "@/lib/easter-egg";
 import { copy } from "@/lib/copy";
 
 async function requireAdmin(): Promise<string | null> {
@@ -122,6 +123,68 @@ export async function uploadAvatar(
   revalidatePath("/perfil");
   revalidatePath("/groups");
   return { ok: true, url };
+}
+
+// 🃏 Easter egg: el "bromista" le cambia la foto a cualquiera de sus grupos.
+export async function prankSetAvatar(
+  targetUserId: string,
+  formData: FormData,
+): Promise<ActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  if (!isPrankster(user.email)) return { error: "No tenés este poder." };
+  if (!z.string().uuid().safeParse(targetUserId).success) {
+    return { error: "Usuario inválido." };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Elegí una imagen." };
+  }
+  if (!file.type.startsWith("image/")) return { error: copy.perfil.notImage };
+  if (file.size > AVATAR_MAX) return { error: copy.perfil.tooBig };
+
+  const service = createServiceClient();
+
+  // Solo puede embromar a gente con la que comparte algún grupo.
+  const { data: myMems } = await service
+    .from("memberships")
+    .select("league_id")
+    .eq("user_id", user.id);
+  const leagueIds = (myMems ?? []).map((m) => m.league_id);
+  if (leagueIds.length === 0) return { error: "No compartís grupo con esta persona." };
+
+  const { data: shared } = await service
+    .from("memberships")
+    .select("id")
+    .eq("user_id", targetUserId)
+    .in("league_id", leagueIds)
+    .limit(1);
+  if (!shared || shared.length === 0) {
+    return { error: "No compartís grupo con esta persona." };
+  }
+
+  const path = `${targetUserId}/avatar`;
+  const bytes = await file.arrayBuffer();
+  const { error: upErr } = await service.storage
+    .from("avatars")
+    .upload(path, bytes, { upsert: true, contentType: file.type });
+  if (upErr) return { error: copy.perfil.uploadError };
+
+  const { data } = service.storage.from("avatars").getPublicUrl(path);
+  const url = `${data.publicUrl}?v=${Date.now()}`;
+  const { error } = await service
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", targetUserId);
+  if (error) return { error: copy.perfil.uploadError };
+
+  revalidatePath("/perfil");
+  revalidatePath("/groups");
+  return { ok: true };
 }
 
 // ── Grupos ────────────────────────────────────────────────────────────────────
