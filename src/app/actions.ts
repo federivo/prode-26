@@ -36,10 +36,10 @@ export async function setDisplayName(
   }
 
   const supabase = await createClient();
+  // upsert (no update) por si la fila de profile no existe todavía.
   const { error } = await supabase
     .from("profiles")
-    .update({ display_name: parsed.data })
-    .eq("id", userId);
+    .upsert({ id: userId, display_name: parsed.data }, { onConflict: "id" });
   if (error) return { error: "No pudimos guardar tu nombre. Probá de nuevo." };
 
   redirect("/groups");
