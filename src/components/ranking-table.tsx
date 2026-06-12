@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { copy } from "@/lib/copy";
 import { Avatar } from "@/components/avatar";
@@ -19,9 +21,11 @@ const MEDAL_RING: Record<number, string> = {
 export function RankingTable({
   rows,
   currentUserId,
+  groupId,
 }: {
   rows: RankingRow[];
   currentUserId: string;
+  groupId: string;
 }) {
   if (rows.length === 0 || rows.every((r) => r.points === 0)) {
     return (
@@ -38,10 +42,11 @@ export function RankingTable({
         const isYou = row.userId === currentUserId;
         const ring = MEDAL_RING[pos];
         return (
-          <div
+          <Link
             key={row.userId}
+            href={`/groups/${groupId}/players/${row.userId}`}
             className={cn(
-              "flex items-center gap-3 rounded-2xl border border-border bg-surface p-3",
+              "flex items-center gap-3 rounded-2xl border border-border bg-surface p-3 transition hover:border-primary/40 hover:bg-primary-soft/30",
               isYou && "border-primary/40 bg-primary-soft/50",
             )}
           >
@@ -85,7 +90,9 @@ export function RankingTable({
                 {row.points === 1 ? "pt" : "pts"}
               </span>
             </div>
-          </div>
+
+            <ChevronRight className="h-4 w-4 shrink-0 text-muted" />
+          </Link>
         );
       })}
     </div>

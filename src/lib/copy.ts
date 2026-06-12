@@ -94,6 +94,14 @@ export const copy = {
     you: "vos",
   },
 
+  player: {
+    subtitle: "Pronósticos de los partidos que ya empezaron.",
+    prediction: "Pronóstico",
+    empty: "Todavía no hay pronósticos para mostrar.",
+    totalPoints: (n: number) => (n === 1 ? "1 punto" : `${n} puntos`),
+    backToRanking: "Volver a la tabla",
+  },
+
   scoring: {
     title: "Cómo se puntúa",
     exact: "Resultado exacto",

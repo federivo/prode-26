@@ -115,7 +115,7 @@ export default async function RankingPage({
         <p className="mt-1 text-sm text-muted">{copy.ranking.subtitle}</p>
       </div>
 
-      <RankingTable rows={rows} currentUserId={session.userId} />
+      <RankingTable rows={rows} currentUserId={session.userId} groupId={id} />
     </div>
   );
 }
