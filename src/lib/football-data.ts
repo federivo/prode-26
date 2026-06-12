@@ -165,10 +165,12 @@ export async function syncMatches(): Promise<SyncResult> {
 }
 
 const STALE_MS = 15 * 60 * 1000; // 15 minutos
+const LIVE_STALE_MS = 90 * 1000; // 90 s mientras hay un partido en vivo
 
 /**
- * Sincroniza solo si pasaron más de 15 min desde la última vez. Pensado para
- * llamarse al renderizar /partidos y la tabla (revalidación perezosa).
+ * Sincroniza si pasó la ventana de frescura desde la última vez. Pensado para
+ * llamarse al renderizar /partidos, la tabla, grupos y la home. Si hay un
+ * partido en vivo, sincroniza más seguido (cada ~90 s) para seguir el resultado.
  * No lanza: si falla, la página igual se muestra con lo que haya en la DB.
  */
 export async function syncIfStale(): Promise<void> {
@@ -178,14 +180,14 @@ export async function syncIfStale(): Promise<void> {
 
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
-      .from("sync_state")
-      .select("last_synced_at")
-      .eq("id", true)
-      .maybeSingle();
+    const [{ data: sync }, { data: live }] = await Promise.all([
+      supabase.from("sync_state").select("last_synced_at").eq("id", true).maybeSingle(),
+      supabase.from("matches").select("id").eq("status", "IN_PLAY").limit(1),
+    ]);
 
-    const last = data?.last_synced_at ? new Date(data.last_synced_at).getTime() : 0;
-    if (Date.now() - last < STALE_MS) return;
+    const last = sync?.last_synced_at ? new Date(sync.last_synced_at).getTime() : 0;
+    const window = live && live.length > 0 ? LIVE_STALE_MS : STALE_MS;
+    if (Date.now() - last < window) return;
 
     await syncMatches();
   } catch (err) {

@@ -2,16 +2,21 @@ import Link from "next/link";
 import { Users, ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getMyGroups } from "@/lib/session";
+import { syncIfStale } from "@/lib/football-data";
+import { getLiveMatches } from "@/lib/live-matches";
 import { copy } from "@/lib/copy";
 import { Card } from "@/components/ui/card";
 import { CreateGroupForm, JoinGroupForm } from "@/components/group-forms";
 import { CopyCode } from "@/components/copy-code";
 import { ShareLink } from "@/components/share-link";
 import { ScoringInfo } from "@/components/scoring-info";
+import { LiveMatchBanner } from "@/components/live-match-banner";
 
 export const dynamic = "force-dynamic";
 
 export default async function GroupsPage() {
+  await syncIfStale();
+  const liveMatches = await getLiveMatches();
   const groups = await getMyGroups();
 
   // Conteo de miembros por grupo (RLS deja ver las membresías de mis grupos).
@@ -34,6 +39,8 @@ export default async function GroupsPage() {
           {copy.groups.title}
         </h1>
       </header>
+
+      <LiveMatchBanner matches={liveMatches} />
 
       {groups.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted">
