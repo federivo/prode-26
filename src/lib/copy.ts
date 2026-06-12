@@ -161,6 +161,12 @@ export const copy = {
     FINAL: "Final",
   } as Record<string, string>,
 
+  theme: {
+    system: "Según el sistema",
+    light: "Modo claro",
+    dark: "Modo oscuro",
+  } as Record<string, string>,
+
   common: {
     loading: "Cargando…",
     back: "Volver",

@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: oklch(0.99 0.005 120);
-  --color-surface: oklch(1 0 0);
-  --color-fg: oklch(0.21 0.02 160);
-  --color-muted: oklch(0.55 0.02 160);
-  --color-border: oklch(0.92 0.01 160);
+/* Las utilidades referencian variables que cambian según el tema (inline). */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
 
-  --color-primary: oklch(0.58 0.15 155);
-  --color-primary-fg: oklch(0.99 0.01 155);
-  --color-primary-soft: oklch(0.95 0.04 155);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
 
-  --color-accent: oklch(0.72 0.17 60);
-  --color-danger: oklch(0.58 0.2 25);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
 
-  --color-gold: oklch(0.82 0.15 85);
-  --color-silver: oklch(0.78 0.01 250);
-  --color-bronze: oklch(0.68 0.1 55);
+  --color-gold: var(--gold);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -24,16 +25,61 @@
   --radius: 0.75rem;
 }
 
+:root {
+  /* Paleta oscura (definida una sola vez). */
+  --d-bg: oklch(0.18 0.015 160);
+  --d-surface: oklch(0.23 0.02 160);
+  --d-fg: oklch(0.96 0.01 160);
+  --d-muted: oklch(0.68 0.02 160);
+  --d-border: oklch(0.32 0.02 160);
+  --d-primary: oklch(0.65 0.15 155);
+  --d-primary-fg: oklch(0.15 0.02 155);
+  --d-primary-soft: oklch(0.3 0.05 155);
+
+  /* Activas = claro por defecto. */
+  --bg: oklch(0.99 0.005 120);
+  --surface: oklch(1 0 0);
+  --fg: oklch(0.21 0.02 160);
+  --muted: oklch(0.55 0.02 160);
+  --border: oklch(0.92 0.01 160);
+  --primary: oklch(0.58 0.15 155);
+  --primary-fg: oklch(0.99 0.01 155);
+  --primary-soft: oklch(0.95 0.04 155);
+
+  --accent: oklch(0.72 0.17 60);
+  --danger: oklch(0.58 0.2 25);
+  --gold: oklch(0.82 0.15 85);
+  --silver: oklch(0.78 0.01 250);
+  --bronze: oklch(0.68 0.1 55);
+
+  color-scheme: light;
+}
+
+/* Oscuro elegido a mano. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: var(--d-bg);
+  --surface: var(--d-surface);
+  --fg: var(--d-fg);
+  --muted: var(--d-muted);
+  --border: var(--d-border);
+  --primary: var(--d-primary);
+  --primary-fg: var(--d-primary-fg);
+  --primary-soft: var(--d-primary-soft);
+}
+
+/* Oscuro según el sistema (salvo que el usuario haya elegido claro). */
 @media (prefers-color-scheme: dark) {
-  @theme {
-    --color-bg: oklch(0.18 0.015 160);
-    --color-surface: oklch(0.23 0.02 160);
-    --color-fg: oklch(0.96 0.01 160);
-    --color-muted: oklch(0.68 0.02 160);
-    --color-border: oklch(0.32 0.02 160);
-    --color-primary: oklch(0.65 0.15 155);
-    --color-primary-fg: oklch(0.15 0.02 155);
-    --color-primary-soft: oklch(0.3 0.05 155);
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: var(--d-bg);
+    --surface: var(--d-surface);
+    --fg: var(--d-fg);
+    --muted: var(--d-muted);
+    --border: var(--d-border);
+    --primary: var(--d-primary);
+    --primary-fg: var(--d-primary-fg);
+    --primary-soft: var(--d-primary-soft);
   }
 }
 

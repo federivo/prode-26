@@ -3,6 +3,7 @@ import { Trophy, LogOut } from "lucide-react";
 import { signOut } from "@/app/actions";
 import { copy } from "@/lib/copy";
 import { Avatar } from "@/components/avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Nav({
   displayName,
@@ -38,6 +39,7 @@ export function Nav({
             <span className="hidden text-sm text-muted sm:inline">{displayName}</span>
             <Avatar url={avatarUrl} name={displayName} size={32} />
           </Link>
+          <ThemeToggle />
           <form action={signOut}>
             <button
               type="submit"
