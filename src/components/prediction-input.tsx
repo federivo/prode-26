@@ -24,7 +24,7 @@ export function PredictionInput({
   const saved = state.ok && !pending;
 
   return (
-    <form action={action} className="flex flex-col items-end gap-1">
+    <form action={action} className="flex flex-col items-center gap-1">
       <input type="hidden" name="match_id" value={matchId} />
       <div className="flex items-center gap-1.5">
         <ScoreBox name="home_score" defaultValue={initialHome} />

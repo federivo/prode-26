@@ -1,7 +1,8 @@
 import { Lock } from "lucide-react";
 import type { Match, Prediction } from "@/lib/supabase/types";
 import { copy } from "@/lib/copy";
-import { formatTime } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
+import { flagEmoji } from "@/lib/flags";
 import { PredictionInput } from "@/components/prediction-input";
 
 export function MatchCard({
@@ -15,58 +16,66 @@ export function MatchCard({
     match.status !== "SCHEDULED" || new Date(match.kickoff) <= new Date();
   const finished = match.status === "FINISHED" && match.home_score !== null;
 
-  const home = match.home_team ?? "A definir";
-  const away = match.away_team ?? "A definir";
-
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
-      <div className="mb-2 flex items-center justify-between text-xs text-muted">
+      {/* Encabezado: fase + horario/estado */}
+      <div className="mb-3 flex items-center justify-between text-xs text-muted">
         <span>{copy.stages[match.stage] ?? match.stage}</span>
         <span className="flex items-center gap-1">
-          {match.status === "IN_PLAY" && (
+          {match.status === "IN_PLAY" ? (
             <span className="font-medium text-danger">● EN VIVO</span>
+          ) : (
+            formatTime(match.kickoff)
           )}
-          {match.status !== "IN_PLAY" && formatTime(match.kickoff)}
           {locked && match.status === "SCHEDULED" && <Lock className="h-3 w-3" />}
         </span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <span className="truncate text-right font-medium">{home}</span>
-
-        <div className="flex justify-center">
+      {/* Equipos: cada nombre con su bandera, a lo ancho de la tarjeta */}
+      <div className="flex items-center gap-2">
+        <Team name={match.home_team} side="home" />
+        <div className="shrink-0 px-1">
           {finished ? (
             <ScoreChip home={match.home_score!} away={match.away_score!} />
-          ) : locked ? (
-            <LockedPrediction prediction={prediction} />
           ) : (
-            <PredictionInput
-              matchId={match.id}
-              initialHome={prediction?.home_score ?? null}
-              initialAway={prediction?.away_score ?? null}
-            />
+            <span className="text-xs font-medium text-muted">{copy.common.vs}</span>
           )}
         </div>
-
-        <span className="truncate font-medium">{away}</span>
+        <Team name={match.away_team} side="away" />
       </div>
 
-      {/* Pie: tu pronóstico y puntos cuando el partido terminó */}
-      {finished && (
-        <div className="mt-3 flex items-center justify-center gap-2 border-t border-border pt-2 text-sm">
-          {prediction ? (
-            <>
-              <span className="text-muted">
-                {copy.matches.yourPrediction}: {prediction.home_score}-
-                {prediction.away_score}
-              </span>
-              <PointsBadge points={prediction.points_awarded ?? 0} />
-            </>
-          ) : (
-            <span className="text-muted">{copy.matches.noPrediction}</span>
-          )}
+      {/* Control: input editable, pronóstico cerrado, o resultado final */}
+      {finished ? (
+        <FinishedFooter prediction={prediction} />
+      ) : locked ? (
+        <div className="mt-3 flex justify-center">
+          <LockedPrediction prediction={prediction} />
+        </div>
+      ) : (
+        <div className="mt-3 flex justify-center">
+          <PredictionInput
+            matchId={match.id}
+            initialHome={prediction?.home_score ?? null}
+            initialAway={prediction?.away_score ?? null}
+          />
         </div>
       )}
+    </div>
+  );
+}
+
+function Team({ name, side }: { name: string | null; side: "home" | "away" }) {
+  const label = name ?? "A definir";
+  const flag = flagEmoji(name);
+  return (
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 items-center gap-2",
+        side === "home" ? "justify-end text-right" : "justify-start text-left",
+      )}
+    >
+      {flag && <span className="shrink-0 text-lg leading-none">{flag}</span>}
+      <span className="truncate font-semibold">{label}</span>
     </div>
   );
 }
@@ -83,9 +92,27 @@ function LockedPrediction({ prediction }: { prediction: Prediction | null }) {
   return (
     <span className="field-num rounded-lg border border-border px-3 py-1 text-sm text-muted">
       {prediction
-        ? `${prediction.home_score} - ${prediction.away_score}`
+        ? `${copy.matches.yourPrediction}: ${prediction.home_score} - ${prediction.away_score}`
         : copy.matches.noPrediction}
     </span>
+  );
+}
+
+function FinishedFooter({ prediction }: { prediction: Prediction | null }) {
+  return (
+    <div className="mt-3 flex items-center justify-center gap-2 border-t border-border pt-2.5 text-sm">
+      {prediction ? (
+        <>
+          <span className="text-muted">
+            {copy.matches.yourPrediction}: {prediction.home_score}-
+            {prediction.away_score}
+          </span>
+          <PointsBadge points={prediction.points_awarded ?? 0} />
+        </>
+      ) : (
+        <span className="text-muted">{copy.matches.noPrediction}</span>
+      )}
+    </div>
   );
 }
 
