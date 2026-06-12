@@ -102,8 +102,9 @@ export default async function AdminPredictionsPage({
 
       <AdminMatchPicker options={options} selected={matchId} />
 
-      {match && (
-        <>
+      {match ? (
+        // key={match.id}: al cambiar de partido se remonta todo con datos nuevos.
+        <div key={match.id} className="contents">
           <div className="rounded-xl border border-border bg-surface p-3 text-sm">
             <span className="font-medium">
               {match.home_team} vs {match.away_team}
@@ -118,23 +119,23 @@ export default async function AdminPredictionsPage({
             matchId={match.id}
             initialHome={match.home_score}
             initialAway={match.away_score}
-            finished={match.status === "FINISHED" && match.home_score !== null}
+            finished={finished}
             manual={match.manual_result}
           />
           <AdminOpenToggle
             matchId={match.id}
             initialOpen={match.predictions_open}
           />
-        </>
-      )}
-
-      {match && rows.length > 0 ? (
-        <AdminPredictionsForm
-          key={match.id}
-          matchId={match.id}
-          finished={finished}
-          users={rows}
-        />
+          {rows.length > 0 ? (
+            <AdminPredictionsForm
+              matchId={match.id}
+              finished={finished}
+              users={rows}
+            />
+          ) : (
+            <p className="text-sm text-muted">{copy.admin.pickMatch}</p>
+          )}
+        </div>
       ) : (
         <p className="text-sm text-muted">{copy.admin.pickMatch}</p>
       )}
