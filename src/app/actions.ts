@@ -45,6 +45,47 @@ export async function setDisplayName(
   redirect("/groups");
 }
 
+/** Igual que setDisplayName pero se queda en /perfil (no redirige). */
+export async function updateProfileName(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const userId = await requireUserId();
+  const parsed = nameSchema.safeParse(formData.get("display_name"));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Nombre inválido." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .upsert({ id: userId, display_name: parsed.data }, { onConflict: "id" });
+  if (error) return { error: "No pudimos guardar tu nombre. Probá de nuevo." };
+
+  revalidatePath("/perfil");
+  revalidatePath("/groups");
+  return { ok: true };
+}
+
+/** Guarda la URL del avatar (el archivo ya se subió a Storage desde el cliente). */
+export async function setAvatarUrl(url: string): Promise<ActionState> {
+  const userId = await requireUserId();
+  if (typeof url !== "string" || url.length > 500) {
+    return { error: "URL inválida." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", userId);
+  if (error) return { error: "No pudimos guardar tu foto. Probá de nuevo." };
+
+  revalidatePath("/perfil");
+  revalidatePath("/groups");
+  return { ok: true };
+}
+
 // ── Grupos ────────────────────────────────────────────────────────────────────
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // sin caracteres ambiguos
 

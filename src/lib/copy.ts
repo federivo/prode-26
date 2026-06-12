@@ -56,6 +56,18 @@ export const copy = {
     invalidCode: "Ese código no existe. Fijate que esté bien escrito.",
   },
 
+  perfil: {
+    title: "Tu perfil",
+    changePhoto: "Cambiar foto",
+    uploading: "Subiendo…",
+    nameLabel: "Tu nombre",
+    save: "Guardar",
+    saved: "¡Guardado!",
+    notImage: "Tiene que ser una imagen.",
+    tooBig: "La imagen es muy pesada (máx 3 MB).",
+    uploadError: "No se pudo subir la foto. Probá de nuevo.",
+  },
+
   matches: {
     title: "Partidos",
     subtitle: "Cargá tu resultado antes de que empiece cada partido.",

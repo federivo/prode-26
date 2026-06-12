@@ -42,16 +42,24 @@ export default async function RankingPage({
 
   const { data: members } = await supabase
     .from("memberships")
-    .select("user_id, profiles(display_name)")
+    .select("user_id, profiles(display_name, avatar_url)")
     .eq("league_id", id);
 
   const memberIds = (members ?? []).map((m) => m.user_id);
-  const nameById = new Map<string, string>(
-    (members ?? []).map((m) => [
-      m.user_id,
-      (m.profiles as unknown as { display_name: string } | null)?.display_name ??
-        "Jugador",
-    ]),
+  const profileById = new Map<
+    string,
+    { name: string; avatarUrl: string | null }
+  >(
+    (members ?? []).map((m) => {
+      const p = m.profiles as unknown as {
+        display_name: string;
+        avatar_url: string | null;
+      } | null;
+      return [
+        m.user_id,
+        { name: p?.display_name || "Jugador", avatarUrl: p?.avatar_url ?? null },
+      ];
+    }),
   );
 
   // Pronósticos de los miembros junto al resultado del partido (para puntos y exactos).
@@ -81,7 +89,8 @@ export default async function RankingPage({
   const rows: RankingRow[] = memberIds
     .map((uid) => ({
       userId: uid,
-      name: nameById.get(uid) ?? "Jugador",
+      name: profileById.get(uid)?.name ?? "Jugador",
+      avatarUrl: profileById.get(uid)?.avatarUrl ?? null,
       points: agg.get(uid)?.points ?? 0,
       exact: agg.get(uid)?.exact ?? 0,
     }))

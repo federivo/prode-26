@@ -16,6 +16,7 @@ export type MembershipRole = "admin" | "member";
 export type Profile = {
   id: string;
   display_name: string;
+  avatar_url: string | null;
   is_app_admin: boolean;
   created_at: string;
 }

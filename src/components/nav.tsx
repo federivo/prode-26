@@ -2,13 +2,16 @@ import Link from "next/link";
 import { Trophy, LogOut } from "lucide-react";
 import { signOut } from "@/app/actions";
 import { copy } from "@/lib/copy";
+import { Avatar } from "@/components/avatar";
 
 export function Nav({
   displayName,
   isAdmin,
+  avatarUrl,
 }: {
   displayName: string;
   isAdmin: boolean;
+  avatarUrl: string | null;
 }) {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-bg/80 backdrop-blur">
@@ -27,7 +30,14 @@ export function Nav({
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden text-sm text-muted sm:inline">{displayName}</span>
+          <Link
+            href="/perfil"
+            className="flex items-center gap-2 rounded-full transition hover:opacity-80"
+            title={copy.perfil.title}
+          >
+            <span className="hidden text-sm text-muted sm:inline">{displayName}</span>
+            <Avatar url={avatarUrl} name={displayName} size={32} />
+          </Link>
           <form action={signOut}>
             <button
               type="submit"

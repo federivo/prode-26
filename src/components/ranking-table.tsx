@@ -1,13 +1,20 @@
-import { Trophy } from "lucide-react";
-import { copy } from "@/lib/copy";
 import { cn } from "@/lib/utils";
+import { copy } from "@/lib/copy";
+import { Avatar } from "@/components/avatar";
 
 export interface RankingRow {
   userId: string;
   name: string;
+  avatarUrl: string | null;
   points: number;
   exact: number;
 }
+
+const MEDAL_RING: Record<number, string> = {
+  1: "ring-gold",
+  2: "ring-silver",
+  3: "ring-bronze",
+};
 
 export function RankingTable({
   rows,
@@ -25,64 +32,62 @@ export function RankingTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border text-left text-xs text-muted">
-            <th className="w-12 px-4 py-2.5 font-medium">{copy.ranking.position}</th>
-            <th className="px-2 py-2.5 font-medium">{copy.ranking.player}</th>
-            <th className="px-3 py-2.5 text-right font-medium">{copy.ranking.exact}</th>
-            <th className="px-4 py-2.5 text-right font-medium">{copy.ranking.points}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => {
-            const pos = i + 1;
-            const isYou = row.userId === currentUserId;
-            return (
-              <tr
-                key={row.userId}
-                className={cn(
-                  "border-b border-border last:border-0",
-                  isYou && "bg-primary-soft/60",
+    <div className="flex flex-col gap-2">
+      {rows.map((row, i) => {
+        const pos = i + 1;
+        const isYou = row.userId === currentUserId;
+        const ring = MEDAL_RING[pos];
+        return (
+          <div
+            key={row.userId}
+            className={cn(
+              "flex items-center gap-3 rounded-2xl border border-border bg-surface p-3",
+              isYou && "border-primary/40 bg-primary-soft/50",
+            )}
+          >
+            {/* Posición */}
+            <span
+              className={cn(
+                "field-num w-6 shrink-0 text-center text-lg font-bold",
+                pos <= 3 ? "text-fg" : "text-muted",
+              )}
+            >
+              {pos}
+            </span>
+
+            {/* Avatar prominente, con aro de medalla para el podio */}
+            <Avatar
+              url={row.avatarUrl}
+              name={row.name}
+              size={pos === 1 ? 52 : 44}
+              className={cn(ring && "ring-2 ring-offset-2 ring-offset-surface", ring)}
+            />
+
+            {/* Nombre + exactos */}
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold">
+                {row.name}
+                {isYou && (
+                  <span className="ml-1.5 text-xs font-normal text-muted">
+                    ({copy.ranking.you})
+                  </span>
                 )}
-              >
-                <td className="px-4 py-3">
-                  <PositionBadge pos={pos} />
-                </td>
-                <td className="px-2 py-3 font-medium">
-                  {row.name}
-                  {isYou && (
-                    <span className="ml-1.5 text-xs text-muted">({copy.ranking.you})</span>
-                  )}
-                </td>
-                <td className="field-num px-3 py-3 text-right text-muted">{row.exact}</td>
-                <td className="field-num px-4 py-3 text-right font-bold">{row.points}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+              </p>
+              <p className="text-xs text-muted">
+                {copy.ranking.exact}: {row.exact}
+              </p>
+            </div>
+
+            {/* Puntos */}
+            <div className="shrink-0 text-right">
+              <span className="field-num text-xl font-bold">{row.points}</span>
+              <span className="ml-1 text-xs text-muted">
+                {row.points === 1 ? "pt" : "pts"}
+              </span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-}
-
-function PositionBadge({ pos }: { pos: number }) {
-  const medal =
-    pos === 1
-      ? "bg-gold text-black"
-      : pos === 2
-        ? "bg-silver text-black"
-        : pos === 3
-          ? "bg-bronze text-white"
-          : "text-muted";
-
-  if (pos <= 3) {
-    return (
-      <span className={cn("inline-flex h-6 w-6 items-center justify-center rounded-full", medal)}>
-        {pos === 1 ? <Trophy className="h-3.5 w-3.5" /> : pos}
-      </span>
-    );
-  }
-  return <span className="pl-1.5 font-medium">{pos}</span>;
 }
