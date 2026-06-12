@@ -35,9 +35,17 @@ export async function getMyGroups(): Promise<
   (League & { role: MembershipRole })[]
 > {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // RLS deja ver todas las membresías de mis grupos (no solo las mías), así que
+  // filtramos por user_id para listar solo los grupos a los que pertenezco.
   const { data } = await supabase
     .from("memberships")
     .select("role, leagues(*)")
+    .eq("user_id", user.id)
     .order("joined_at", { ascending: true });
 
   return (data ?? [])
