@@ -22,8 +22,10 @@ export function CreateGroupForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <PlusCircle className="h-4 w-4 text-primary" />
+        <CardTitle className="flex items-center gap-2.5 text-base">
+          <span className="bg-gilded flex h-7 w-7 items-center justify-center rounded-lg text-primary-fg">
+            <PlusCircle className="h-4 w-4" />
+          </span>
           {copy.groups.createTitle}
         </CardTitle>
         <CardDescription>{copy.groups.createSubtitle}</CardDescription>
@@ -58,8 +60,10 @@ export function JoinGroupForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <LogIn className="h-4 w-4 text-primary" />
+        <CardTitle className="flex items-center gap-2.5 text-base">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 text-muted ring-1 ring-border">
+            <LogIn className="h-4 w-4" />
+          </span>
           {copy.groups.joinTitle}
         </CardTitle>
         <CardDescription>{copy.groups.joinSubtitle}</CardDescription>

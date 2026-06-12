@@ -28,7 +28,7 @@ export function AdminOpenToggle({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-3">
+    <div className="gilded-edge overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-soft)]">
       <label className="flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"

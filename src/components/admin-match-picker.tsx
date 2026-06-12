@@ -20,7 +20,7 @@ export function AdminMatchPicker({
     <select
       value={selected ?? ""}
       onChange={(e) => router.push(`/admin/predictions?match=${e.target.value}`)}
-      className="h-10 w-full rounded-xl border border-border bg-surface px-3 text-sm text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-fg transition hover:border-primary/40 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <option value="" disabled>
         {copy.admin.pickMatch}

@@ -92,7 +92,7 @@ export default async function AdminPredictionsPage({
           <ChevronLeft className="h-4 w-4" />
           {copy.admin.title}
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
           {copy.admin.editPredictions}
         </h1>
         <p className="mt-1 text-sm text-muted">
@@ -105,11 +105,11 @@ export default async function AdminPredictionsPage({
       {match ? (
         // key={match.id}: al cambiar de partido se remonta todo con datos nuevos.
         <div key={match.id} className="contents">
-          <div className="rounded-xl border border-border bg-surface p-3 text-sm">
-            <span className="font-medium">
+          <div className="gilded-edge flex flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden rounded-xl border border-border bg-surface p-3.5 text-sm shadow-[var(--shadow-soft)]">
+            <span className="font-display font-semibold tracking-tight">
               {match.home_team} vs {match.away_team}
             </span>
-            <span className="ml-2 text-muted">
+            <span className="field-num text-muted">
               {finished
                 ? `${copy.admin.resultLabel}: ${match.home_score}-${match.away_score}`
                 : copy.admin.notFinishedYet}

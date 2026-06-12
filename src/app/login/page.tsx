@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Trophy, Mail, MailCheck } from "lucide-react";
+import { Trophy, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl } from "@/lib/site";
 import { copy } from "@/lib/copy";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+
+const TIERS = [
+  { label: copy.scoring.exact, pts: copy.scoring.exactPts },
+  { label: copy.scoring.outcome, pts: copy.scoring.outcomePts },
+];
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,13 +31,19 @@ export default function LoginPage() {
 
   return (
     <main className="flex flex-1 items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <div className="stagger w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-fg shadow-sm">
-            <Trophy className="h-7 w-7" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">{copy.appName}</h1>
-          <p className="mt-1 text-sm text-muted">{copy.tagline}</p>
+          <span className="bg-gilded sheen mb-5 flex h-16 w-16 items-center justify-center rounded-2xl text-primary-fg shadow-[var(--shadow-gold)]">
+            <Trophy className="h-8 w-8" strokeWidth={2.25} />
+          </span>
+          <p className="text-gilded text-xs font-semibold uppercase tracking-[0.22em]">
+            Mundial FIFA 2026
+          </p>
+          <h1 className="text-gilded font-display text-4xl font-semibold tracking-tight">
+            {copy.appName}
+          </h1>
+          {/* La explicación del login (entrá con tu mail, te llega un link). */}
+          <p className="mt-2 text-sm text-muted">{copy.login.subtitle}</p>
         </div>
 
         <Card>
@@ -42,20 +53,10 @@ export default function LoginPage() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-primary">
                   <MailCheck className="h-6 w-6" />
                 </span>
-                <p className="text-sm text-fg">{copy.login.sent}</p>
+                <p className="text-sm font-medium text-fg">{copy.login.sent}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <div className="flex items-start gap-2.5">
-                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <div>
-                    <h2 className="text-sm font-semibold">{copy.login.title}</h2>
-                    <p className="mt-0.5 text-sm text-muted">
-                      {copy.login.subtitle}
-                    </p>
-                  </div>
-                </div>
-
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="email">{copy.login.emailLabel}</Label>
                   <Input
@@ -69,8 +70,7 @@ export default function LoginPage() {
                   />
                   <p className="text-xs text-muted">{copy.login.emailHelp}</p>
                 </div>
-
-                <Button type="submit" disabled={status === "sending"}>
+                <Button type="submit" size="lg" disabled={status === "sending"}>
                   {status === "sending" ? copy.login.sending : copy.login.submit}
                 </Button>
                 {status === "error" && (
@@ -81,10 +81,15 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-6 text-center text-xs text-muted">
-          {copy.scoring.exact}: {copy.scoring.exactPts} · {copy.scoring.outcome}:{" "}
-          {copy.scoring.outcomePts}
-        </p>
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
+          {TIERS.map((t, i) => (
+            <span key={t.label} className="flex items-center gap-2">
+              {i > 0 && <span className="text-border">·</span>}
+              <span>{t.label}</span>
+              <span className="field-num font-semibold text-fg">{t.pts}</span>
+            </span>
+          ))}
+        </div>
       </div>
     </main>
   );

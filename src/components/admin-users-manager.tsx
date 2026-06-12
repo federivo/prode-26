@@ -55,8 +55,10 @@ function CreateUserForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <UserPlus className="h-4 w-4 text-primary" />
+        <CardTitle className="flex items-center gap-2.5 text-base">
+          <span className="bg-gilded flex h-7 w-7 items-center justify-center rounded-lg text-primary-fg">
+            <UserPlus className="h-4 w-4" />
+          </span>
           {copy.admin.createUser}
         </CardTitle>
         <CardDescription>{copy.admin.usersDesc}</CardDescription>

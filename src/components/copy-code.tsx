@@ -21,11 +21,11 @@ export function CopyCode({ code }: { code: string }) {
     <button
       onClick={handleCopy}
       title={t.groups.copyCode}
-      className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg px-2.5 py-1 font-mono text-sm font-semibold tracking-widest transition hover:bg-primary-soft"
+      className="field-num inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-2.5 py-1 text-sm font-semibold tracking-widest text-fg transition hover:border-primary/40 hover:bg-primary-soft/40"
     >
       {code}
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-primary" />
+        <Check className="h-3.5 w-3.5 text-accent" />
       ) : (
         <Copy className="h-3.5 w-3.5 text-muted" />
       )}

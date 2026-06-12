@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Check, Save } from "lucide-react";
 import { adminSavePredictions } from "@/app/actions";
 import { copy } from "@/lib/copy";
+import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -68,7 +69,16 @@ export function AdminPredictionsForm({
               {r.name}
             </span>
             {finished && r.points !== null && (
-              <span className="field-num rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
+              <span
+                className={cn(
+                  "field-num rounded-full px-2 py-0.5 text-xs font-bold",
+                  r.points >= 10
+                    ? "bg-gilded text-primary-fg shadow-[var(--shadow-gold)]"
+                    : r.points > 0
+                      ? "bg-primary-soft/70 text-fg ring-1 ring-primary/30"
+                      : "bg-surface-2 text-muted",
+                )}
+              >
                 {r.points} {copy.admin.pointsCol}
               </span>
             )}
@@ -124,7 +134,7 @@ function ScoreInput({
       max={99}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="field-num h-9 w-12 rounded-lg border border-border bg-surface text-center text-base font-semibold text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="field-num h-10 w-12 rounded-lg border border-border bg-surface-2 text-center text-base font-semibold text-fg transition hover:border-primary/40 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     />
   );
 }

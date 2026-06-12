@@ -54,9 +54,9 @@ export function ThemeToggle() {
       onClick={cycle}
       title={copy.theme[mode]}
       aria-label={copy.theme[mode]}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition hover:bg-primary-soft hover:text-fg"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-primary-soft/60 hover:text-fg"
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-[18px] w-[18px]" />
     </button>
   );
 }

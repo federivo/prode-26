@@ -51,16 +51,23 @@ export default async function PerfilPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">{copy.perfil.title}</h1>
+    <div className="flex flex-col gap-6">
+      <header className="flex items-center gap-3">
+        <div>
+          <p className="text-gilded text-xs font-semibold uppercase tracking-[0.18em]">
+            {copy.appName}
+          </p>
+          <h1 className="mt-0.5 font-display text-3xl font-semibold tracking-tight">
+            {copy.perfil.title}
+          </h1>
+        </div>
         {prankster && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-black">
+          <span className="inline-flex items-center gap-1 self-start rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-black">
             <Sparkles className="h-3.5 w-3.5" />
             {copy.easterEgg.badge}
           </span>
         )}
-      </div>
+      </header>
 
       <Card>
         <CardContent className="flex flex-col gap-6 pt-6">

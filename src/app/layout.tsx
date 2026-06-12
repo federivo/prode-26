@@ -1,20 +1,37 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Display serif de alto contraste — sensación de trofeo grabado.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  axes: ["opsz"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Cuerpo cálido y con carácter, excelente para español.
+const hanken = Hanken_Grotesk({
+  variable: "--font-hanken",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Prode Mundial 2026",
-  description: "Jugá al prode del Mundial 2026 con tus amigos. Cargá tus pronósticos y competí en la tabla.",
+  title: {
+    default: "Prode Mundial 2026",
+    template: "%s · Prode Mundial 2026",
+  },
+  description:
+    "Jugá al prode del Mundial 2026 con tus amigos. Cargá tus pronósticos y competí por la corona.",
+  applicationName: "Prode Mundial 2026",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f2e7" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1813" },
+  ],
 };
 
 export default function RootLayout({
@@ -25,7 +42,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-AR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${hanken.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -36,7 +53,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
