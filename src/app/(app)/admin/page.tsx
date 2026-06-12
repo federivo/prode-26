@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronRight, Pencil } from "lucide-react";
+import { ChevronRight, Pencil, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/session";
 import { copy } from "@/lib/copy";
@@ -58,6 +58,20 @@ export default async function AdminPage() {
           <span className="block text-sm text-muted">
             {copy.admin.editPredictionsDesc}
           </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-muted" />
+      </Link>
+
+      <Link
+        href="/admin/users"
+        className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 transition hover:bg-primary-soft/40"
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
+          <Users className="h-4 w-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">{copy.admin.users}</span>
+          <span className="block text-sm text-muted">{copy.admin.usersDesc}</span>
         </span>
         <ChevronRight className="h-5 w-5 shrink-0 text-muted" />
       </Link>

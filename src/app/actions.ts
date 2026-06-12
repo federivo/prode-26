@@ -324,3 +324,79 @@ export async function adminSavePredictions(
   revalidatePath("/matches");
   return { ok: true, saved: rows.length };
 }
+
+// ── Admin: gestión de usuarios ────────────────────────────────────────────────
+const emailSchema = z.string().trim().email("Mail inválido.");
+
+export async function adminCreateUser(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+
+  const email = emailSchema.safeParse(formData.get("email"));
+  const name = nameSchema.safeParse(formData.get("display_name"));
+  if (!email.success) return { error: email.error.issues[0]?.message };
+  if (!name.success) return { error: "El nombre necesita al menos 2 letras." };
+
+  const service = createServiceClient();
+  const { data, error } = await service.auth.admin.createUser({
+    email: email.data,
+    email_confirm: true, // así puede entrar con magic link sin confirmar
+  });
+  if (error || !data.user) {
+    const dup = error?.message?.toLowerCase().includes("already");
+    return { error: dup ? "Ya existe un usuario con ese mail." : "No se pudo crear el usuario." };
+  }
+
+  // El trigger crea el profile; le ponemos el nombre.
+  await service
+    .from("profiles")
+    .upsert({ id: data.user.id, display_name: name.data }, { onConflict: "id" });
+
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
+
+export async function adminUpdateUser(
+  userId: string,
+  displayName: string,
+  isAdmin: boolean,
+): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+
+  const name = nameSchema.safeParse(displayName);
+  if (!name.success) return { error: "El nombre necesita al menos 2 letras." };
+  if (!z.string().uuid().safeParse(userId).success) {
+    return { error: "Usuario inválido." };
+  }
+
+  const service = createServiceClient();
+  const { error } = await service
+    .from("profiles")
+    .update({ display_name: name.data, is_app_admin: !!isAdmin })
+    .eq("id", userId);
+  if (error) return { error: "No se pudieron guardar los cambios." };
+
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
+
+export async function adminDeleteUser(userId: string): Promise<ActionState> {
+  const adminId = await requireAdmin();
+  if (!adminId) return { error: copy.admin.notAdmin };
+  if (userId === adminId) return { error: "No podés borrarte a vos mismo." };
+  if (!z.string().uuid().safeParse(userId).success) {
+    return { error: "Usuario inválido." };
+  }
+
+  const service = createServiceClient();
+  // Borra el auth user; profiles/predictions/memberships caen por FK on delete cascade.
+  const { error } = await service.auth.admin.deleteUser(userId);
+  if (error) return { error: "No se pudo borrar el usuario." };
+
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
