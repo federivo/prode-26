@@ -1,14 +1,20 @@
 import Link from "next/link";
-import { Crosshair } from "lucide-react";
+import { ChevronDown, Crosshair } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/session";
 import { syncIfStale } from "@/lib/football-data";
 import { copy } from "@/lib/copy";
-import { dayKey, formatDayHeading } from "@/lib/utils";
+import { dayKey, formatDayHeading, todayDayKey } from "@/lib/utils";
 import { MatchCard } from "@/components/match-card";
 import type { Match, Prediction } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
+
+interface DayGroup {
+  day: string;
+  label: string;
+  matches: Match[];
+}
 
 export default async function MatchesPage() {
   const session = await requireSession();
@@ -30,7 +36,7 @@ export default async function MatchesPage() {
   );
 
   // Agrupar por día (horario de Argentina).
-  const groups: { day: string; label: string; matches: Match[] }[] = [];
+  const groups: DayGroup[] = [];
   for (const m of matches ?? []) {
     const key = dayKey(m.kickoff);
     let group = groups.at(-1);
@@ -40,6 +46,12 @@ export default async function MatchesPage() {
     }
     group.matches.push(m);
   }
+
+  // Hoy + futuro se muestran; los días anteriores van a "Partidos jugados".
+  const today = todayDayKey();
+  const currentGroups = groups.filter((g) => g.day >= today);
+  const pastGroups = groups.filter((g) => g.day < today).reverse(); // más reciente primero
+  const pastCount = pastGroups.reduce((n, g) => n + g.matches.length, 0);
 
   return (
     <div className="flex flex-col gap-7">
@@ -62,29 +74,63 @@ export default async function MatchesPage() {
         </Link>
       </header>
 
-      {groups.length === 0 ? (
+      {(matches ?? []).length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted">
           {copy.matches.empty}
         </p>
       ) : (
-        groups.map((group) => (
-          <section key={group.day} className="flex flex-col gap-3">
-            <h2 className="flex items-center gap-2 px-0.5 text-sm font-semibold capitalize tracking-tight text-muted">
-              <span className="bg-gilded h-1.5 w-1.5 rounded-full" />
-              {group.label}
-            </h2>
-            <div className="stagger flex flex-col gap-3">
-              {group.matches.map((m) => (
-                <MatchCard
-                  key={m.id}
-                  match={m}
-                  prediction={predByMatch.get(m.id) ?? null}
-                />
-              ))}
-            </div>
-          </section>
-        ))
+        <>
+          {currentGroups.length > 0 ? (
+            currentGroups.map((group) => (
+              <DaySection key={group.day} group={group} predByMatch={predByMatch} />
+            ))
+          ) : (
+            <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted">
+              {copy.matches.noUpcoming}
+            </p>
+          )}
+
+          {pastGroups.length > 0 && (
+            <details className="group flex flex-col gap-3" open={currentGroups.length === 0}>
+              <summary className="gilded-edge flex cursor-pointer list-none items-center justify-between gap-2 rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold shadow-[var(--shadow-soft)] transition-colors hover:bg-surface-2/60">
+                <span>{copy.matches.playedTitle(pastCount)}</span>
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="mt-3 flex flex-col gap-7">
+                {pastGroups.map((group) => (
+                  <DaySection key={group.day} group={group} predByMatch={predByMatch} />
+                ))}
+              </div>
+            </details>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function DaySection({
+  group,
+  predByMatch,
+}: {
+  group: DayGroup;
+  predByMatch: Map<string, Prediction>;
+}) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="flex items-center gap-2 px-0.5 text-sm font-semibold capitalize tracking-tight text-muted">
+        <span className="bg-gilded h-1.5 w-1.5 rounded-full" />
+        {group.label}
+      </h2>
+      <div className="stagger flex flex-col gap-3">
+        {group.matches.map((m) => (
+          <MatchCard
+            key={m.id}
+            match={m}
+            prediction={predByMatch.get(m.id) ?? null}
+          />
+        ))}
+      </div>
+    </section>
   );
 }

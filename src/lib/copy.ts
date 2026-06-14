@@ -93,6 +93,8 @@ export const copy = {
     closesAt: "Cierra al empezar el partido",
     openHint: "Abierto para cargar tu pronóstico",
     empty: "Todavía no hay partidos cargados. Volvé en un rato.",
+    playedTitle: (n: number) => `Partidos jugados (${n})`,
+    noUpcoming: "No hay próximos partidos.",
   },
 
   focus: {

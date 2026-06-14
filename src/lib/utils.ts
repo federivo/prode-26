@@ -44,6 +44,11 @@ export function dayKey(date: Date | string): string {
   }).format(d);
 }
 
+/** Clave del día de hoy (horario AR). En función aparte para no leer el reloj en el render. */
+export function todayDayKey(): string {
+  return dayKey(new Date());
+}
+
 /** Solo la hora. Ej: "13:00". */
 export function formatTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
