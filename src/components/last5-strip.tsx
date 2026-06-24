@@ -6,9 +6,8 @@ import type { Last5Cell } from "@/lib/ranking";
  * Franja "Últimos 5": una grilla de bloques idénticos (uno por partido, en orden
  * cronológico). Cada bloque muestra los puntos centrados; el color codifica la
  * categoría y el número el valor exacto. El acierto exacto va en dorado. El
- * partido en juego se distingue porque el bloque está inclinado y enmarcado en
- * rojo (un bloque "torcido" salta entre los demás, que están derechos); un
- * bloque vacío punteado si el jugador no pronosticó.
+ * partido en juego se distingue por un destello rojo que recorre su borde
+ * (offset-path); un bloque vacío punteado si el jugador no pronosticó.
  */
 export function Last5Strip({ cells }: { cells: Last5Cell[] }) {
   if (cells.length === 0) return null;
@@ -62,17 +61,15 @@ function Block({ cell }: { cell: Last5Cell }) {
   const positive = pts > 0;
 
   if (cell.live) {
-    // "En vivo": el bloque se inclina y se enmarca en rojo. Un bloque torcido
-    // entre los demás (derechos) es el diferenciador, sin íconos encima.
+    // "En vivo": un destello rojo recorre el borde (offset-path). El borde rojo
+    // fijo queda como respaldo si no hay soporte o se pide menos movimiento.
     return (
       <span
         title={title}
         aria-label={title}
-        className={cn(
-          BLOCK,
-          "-rotate-6 border-2 border-danger bg-danger/12 text-fg ring-1 ring-danger/25",
-        )}
+        className={cn(BLOCK, "border border-danger/70 bg-danger/10 text-fg")}
       >
+        <span aria-hidden className="live-trail" />
         {pts}
       </span>
     );
