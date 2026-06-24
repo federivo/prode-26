@@ -5,9 +5,10 @@ import type { Last5Cell } from "@/lib/ranking";
 /**
  * Franja "Últimos 5": una grilla de bloques idénticos (uno por partido, en orden
  * cronológico). Cada bloque muestra los puntos centrados; el color codifica la
- * categoría y el número el valor exacto. El único que brilla es el acierto
- * exacto (relleno dorado). Los en vivo van en rojo con un punto que late en la
- * esquina; un bloque vacío punteado si el jugador no pronosticó.
+ * categoría y el número el valor exacto. El acierto exacto va en dorado. El
+ * partido en juego se distingue porque el bloque está inclinado y enmarcado en
+ * rojo (un bloque "torcido" salta entre los demás, que están derechos); un
+ * bloque vacío punteado si el jugador no pronosticó.
  */
 export function Last5Strip({ cells }: { cells: Last5Cell[] }) {
   if (cells.length === 0) return null;
@@ -16,7 +17,7 @@ export function Last5Strip({ cells }: { cells: Last5Cell[] }) {
       <span className="shrink-0 text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-muted/80">
         {copy.ranking.last5Short}
       </span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {cells.map((cell) => (
           <Block key={cell.matchId} cell={cell} />
         ))}
@@ -60,28 +61,36 @@ function Block({ cell }: { cell: Last5Cell }) {
   const exact = pts >= 10;
   const positive = pts > 0;
 
+  if (cell.live) {
+    // "En vivo": el bloque se inclina y se enmarca en rojo. Un bloque torcido
+    // entre los demás (derechos) es el diferenciador, sin íconos encima.
+    return (
+      <span
+        title={title}
+        aria-label={title}
+        className={cn(
+          BLOCK,
+          "-rotate-6 border-2 border-danger bg-danger/12 text-fg ring-1 ring-danger/25",
+        )}
+      >
+        {pts}
+      </span>
+    );
+  }
+
   return (
     <span
       title={title}
       aria-label={title}
       className={cn(
         BLOCK,
-        cell.live
-          ? "bg-danger/12 text-fg"
-          : exact
-            ? "bg-gilded text-primary-fg"
-            : positive
-              ? "bg-primary-soft text-fg ring-1 ring-primary/20"
-              : "bg-surface-2 text-muted ring-1 ring-border/70",
+        exact
+          ? "bg-gilded text-primary-fg"
+          : positive
+            ? "bg-primary-soft text-fg ring-1 ring-primary/20"
+            : "bg-surface-2 text-muted ring-1 ring-border/70",
       )}
     >
-      {cell.live && (
-        // "En vivo": marco rojo apenas inclinado, en lugar de un ícono encima.
-        <span
-          aria-hidden
-          className="dot-live pointer-events-none absolute -inset-0.5 rotate-[5deg] rounded-lg border border-danger/60"
-        />
-      )}
       {pts}
     </span>
   );
