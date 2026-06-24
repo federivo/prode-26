@@ -1,0 +1,89 @@
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { copy } from "@/lib/copy";
+import type { Last5Cell } from "@/lib/ranking";
+
+/**
+ * Franja "Últimos 5": una pill por cada partido reciente (en vivo o terminado).
+ * Las pills en vivo muestran puntaje provisorio con el tratamiento `danger` de
+ * la app; las que el jugador no pronosticó quedan como "—" para mantener las
+ * columnas alineadas entre filas.
+ */
+export function Last5Strip({ cells }: { cells: Last5Cell[] }) {
+  if (cells.length === 0) return null;
+  return (
+    <div className="mt-2.5 flex items-center gap-2 border-t border-border/60 pt-2">
+      <span className="shrink-0 text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-muted">
+        {copy.ranking.last5Short}
+      </span>
+      <div className="flex flex-wrap items-center gap-1">
+        {cells.map((cell) => (
+          <Pill key={cell.matchId} cell={cell} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function pillTitle(c: Last5Cell): string {
+  const home = c.homeTeam ?? "?";
+  const away = c.awayTeam ?? "?";
+  const score = `${c.actualHome ?? "-"}-${c.actualAway ?? "-"}`;
+  const game = `${home} ${score} ${away}`;
+  if (!c.predicted) return `${game} · ${copy.ranking.noPredictionShort}`;
+  const mine = `${copy.ranking.yourShort} ${c.predHome}-${c.predAway}`;
+  const pts = c.points && c.points > 0 ? `+${c.points}` : "0";
+  const liveTag = c.live ? ` · ${copy.ranking.liveShort}` : "";
+  return `${game} · ${mine} · ${pts}${liveTag}`;
+}
+
+const PILL_BASE =
+  "field-num inline-flex h-6 min-w-[1.95rem] items-center justify-center gap-0.5 rounded-md px-1.5 text-[0.7rem] font-bold leading-none";
+
+function Pill({ cell }: { cell: Last5Cell }) {
+  const title = pillTitle(cell);
+
+  if (!cell.predicted) {
+    return (
+      <span
+        title={title}
+        aria-label={title}
+        className={cn(
+          PILL_BASE,
+          "border border-dashed border-border font-semibold text-muted/70",
+        )}
+      >
+        —
+      </span>
+    );
+  }
+
+  const pts = cell.points ?? 0;
+  const exact = pts >= 10;
+  const positive = pts > 0;
+  const label = positive ? `+${pts}` : "0";
+
+  return (
+    <span
+      title={title}
+      aria-label={title}
+      className={cn(
+        PILL_BASE,
+        cell.live
+          ? "border border-danger/45 bg-danger/10 text-fg"
+          : exact
+            ? "bg-gilded text-primary-fg shadow-[var(--shadow-gold)]"
+            : positive
+              ? "bg-primary-soft/70 text-fg ring-1 ring-primary/30"
+              : "bg-surface-2 text-muted",
+      )}
+    >
+      {cell.live ? (
+        <span className="dot-live h-1 w-1 shrink-0 rounded-full bg-danger" />
+      ) : (
+        exact && <Star className="h-2.5 w-2.5 shrink-0 fill-current" />
+      )}
+      {label}
+    </span>
+  );
+}

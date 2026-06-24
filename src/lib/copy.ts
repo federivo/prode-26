@@ -119,13 +119,18 @@ export const copy = {
 
   ranking: {
     title: "Tabla de posiciones",
-    subtitle: "Se actualiza a medida que terminan los partidos.",
+    subtitle: "Se actualiza en vivo a medida que se juegan los partidos.",
     position: "Pos",
     player: "Jugador",
     exact: "Exactos",
     points: "Puntos",
     empty: "Todavía nadie sumó puntos. ¡A jugar!",
     you: "vos",
+    last5Short: "Últ. 5",
+    liveNote: (n: number) => `+${n} en vivo`,
+    yourShort: "vos",
+    liveShort: "en vivo",
+    noPredictionShort: "sin pronóstico",
   },
 
   player: {
