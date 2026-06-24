@@ -1,31 +1,31 @@
-import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { copy } from "@/lib/copy";
 import type { Last5Cell } from "@/lib/ranking";
 
 /**
- * Franja "Últimos 5": tira segmentada con los puntos de los 5 partidos más
- * recientes, en orden cronológico. Todos los chips comparten alto, ancho mínimo
- * y forma; el único que brilla es el del acierto exacto (relleno dorado). Los
- * en vivo van en rojo con un punto que late; "—" si el jugador no pronosticó.
+ * Franja "Últimos 5": una grilla de bloques idénticos (uno por partido, en orden
+ * cronológico). Cada bloque muestra los puntos centrados; el color codifica la
+ * categoría y el número el valor exacto. El único que brilla es el acierto
+ * exacto (relleno dorado). Los en vivo van en rojo con un punto que late en la
+ * esquina; un bloque vacío punteado si el jugador no pronosticó.
  */
 export function Last5Strip({ cells }: { cells: Last5Cell[] }) {
   if (cells.length === 0) return null;
   return (
-    <div className="mt-2.5 flex items-center gap-2.5 border-t border-border/60 pt-2.5">
-      <span className="shrink-0 text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-muted">
+    <div className="mt-3 flex items-center gap-3 border-t border-border/50 pt-3">
+      <span className="shrink-0 text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-muted/80">
         {copy.ranking.last5Short}
       </span>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         {cells.map((cell) => (
-          <Pill key={cell.matchId} cell={cell} />
+          <Block key={cell.matchId} cell={cell} />
         ))}
       </div>
     </div>
   );
 }
 
-function pillTitle(c: Last5Cell): string {
+function blockTitle(c: Last5Cell): string {
   const home = c.homeTeam ?? "?";
   const away = c.awayTeam ?? "?";
   const score = `${c.actualHome ?? "-"}-${c.actualAway ?? "-"}`;
@@ -37,21 +37,21 @@ function pillTitle(c: Last5Cell): string {
   return `${game} · ${mine} · ${pts}${liveTag}`;
 }
 
-// Mismo alto/forma para todos los chips: la consistencia es lo que ordena la tira.
-const CHIP =
-  "field-num inline-flex h-[1.7rem] min-w-[2.05rem] items-center justify-center gap-0.5 rounded-lg px-1.5 text-[0.72rem] font-bold leading-none";
+// Bloque idéntico para todos los partidos: la grilla pareja es lo que ordena la tira.
+const BLOCK =
+  "relative inline-flex h-8 w-8 items-center justify-center rounded-lg field-num font-display text-sm font-semibold leading-none";
 
-function Pill({ cell }: { cell: Last5Cell }) {
-  const title = pillTitle(cell);
+function Block({ cell }: { cell: Last5Cell }) {
+  const title = blockTitle(cell);
 
   if (!cell.predicted) {
     return (
       <span
         title={title}
         aria-label={title}
-        className={cn(CHIP, "border border-dashed border-border/70 text-muted/55")}
+        className={cn(BLOCK, "border border-dashed border-border text-muted/40")}
       >
-        —
+        –
       </span>
     );
   }
@@ -59,29 +59,30 @@ function Pill({ cell }: { cell: Last5Cell }) {
   const pts = cell.points ?? 0;
   const exact = pts >= 10;
   const positive = pts > 0;
-  const label = positive ? `+${pts}` : "0";
 
   return (
     <span
       title={title}
       aria-label={title}
       className={cn(
-        CHIP,
+        BLOCK,
         cell.live
-          ? "border border-danger/50 bg-danger/10 text-danger"
+          ? "bg-danger/12 text-fg"
           : exact
             ? "bg-gilded text-primary-fg"
             : positive
-              ? "bg-primary-soft/70 text-fg ring-1 ring-primary/25"
-              : "bg-surface-2 text-muted/80 ring-1 ring-border",
+              ? "bg-primary-soft text-fg ring-1 ring-primary/20"
+              : "bg-surface-2 text-muted ring-1 ring-border/70",
       )}
     >
-      {cell.live ? (
-        <span className="dot-live h-1.5 w-1.5 shrink-0 rounded-full bg-danger" />
-      ) : (
-        exact && <Star className="h-2.5 w-2.5 shrink-0 fill-current" />
+      {cell.live && (
+        // "En vivo": marco rojo apenas inclinado, en lugar de un ícono encima.
+        <span
+          aria-hidden
+          className="dot-live pointer-events-none absolute -inset-0.5 rotate-[5deg] rounded-lg border border-danger/60"
+        />
       )}
-      {label}
+      {pts}
     </span>
   );
 }
