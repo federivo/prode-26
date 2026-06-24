@@ -7,6 +7,7 @@ import { signOut } from "@/app/actions";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/avatar";
+import { ScoringHelp } from "@/components/scoring-help";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const BASE_TABS = [
@@ -30,7 +31,7 @@ export function Nav({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-bg/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-2xl items-center gap-1.5 px-4">
+      <div className="relative mx-auto flex h-16 max-w-2xl items-center gap-1.5 px-4">
         <Link
           href="/groups"
           className="mr-1 flex shrink-0 items-center gap-2.5"
@@ -82,6 +83,7 @@ export function Nav({
               className="ring-1 ring-border"
             />
           </Link>
+          <ScoringHelp />
           <ThemeToggle />
           <form action={signOut}>
             <button
