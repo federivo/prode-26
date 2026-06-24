@@ -308,6 +308,13 @@ body::after {
   }
 }
 
+/* "En vivo": un destello recorre el borde del bloque siguiendo offset-path. */
+@keyframes live-trail {
+  to {
+    offset-distance: 100%;
+  }
+}
+
 .animate-rise {
   animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -332,6 +339,35 @@ body::after {
   animation: pulse-live 1.4s ease-in-out infinite;
 }
 
+/*
+ * Rastro del borde "en vivo": un cometa diminuto cuya cabeza (offset-anchor
+ * 100% 50%) recorre el contorno del bloque vía offset-path; el degradado deja
+ * una estela. El radio del rect() coincide con rounded-lg (0.5rem). Si no hay
+ * soporte de offset-path o se pide menos movimiento, queda el borde rojo fijo.
+ */
+.live-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 16px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--danger) 60%, white) 65%,
+    #fff
+  );
+  offset-path: rect(0 auto auto 0 round 0.5rem);
+  offset-anchor: 100% 50%;
+  offset-rotate: auto;
+  offset-distance: 0%;
+  filter: drop-shadow(0 0 4px var(--danger)) drop-shadow(0 0 2px var(--danger));
+  animation: live-trail 2.1s linear infinite;
+  pointer-events: none;
+  will-change: offset-distance;
+}
+
 /* ── Accesibilidad: respetar reduce-motion ──────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -343,6 +379,10 @@ body::after {
   }
   .stagger > * {
     animation: none;
+  }
+  /* Sin movimiento: queda el borde rojo fijo como marca de "en vivo". */
+  .live-trail {
+    display: none;
   }
 }
 
