@@ -35,6 +35,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/join") ||
+    pathname === "/manifest.webmanifest" ||
     pathname.startsWith("/api");
 
   // Sin sesión y ruta privada → al login.
