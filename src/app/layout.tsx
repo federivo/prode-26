@@ -26,6 +26,11 @@ export const metadata: Metadata = {
   description:
     "Jugá al prode del Mundial 2026 con tus amigos. Cargá tus pronósticos y competí por la corona.",
   applicationName: "Prode Mundial 2026",
+  appleWebApp: {
+    capable: true,
+    title: "Prode 26",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
