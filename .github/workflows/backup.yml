@@ -47,12 +47,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
 
-      - name: Clonar el repo de backups
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.REPO_BACKUPS }}
-          token: ${{ secrets.BACKUP_REPO_TOKEN }}
-          path: backups
+      - name: Clonar (o inicializar) el repo de backups
+        env:
+          GH_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+        run: |
+          REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${REPO_BACKUPS}.git"
+          # El repo puede estar vacío (sin rama main). Si el clone falla, lo
+          # inicializamos local y conectamos el remote igual.
+          if git clone --depth 1 "$REMOTE" backups 2>/dev/null; then
+            echo "Repo de backups clonado."
+          else
+            echo "Repo vacío o sin main; inicializando uno nuevo."
+            mkdir -p backups
+            cd backups
+            git init -b main
+            git remote add origin "$REMOTE"
+          fi
 
       - name: Generar el dump
         env:
@@ -83,5 +93,5 @@ jobs:
             echo "Sin cambios (¿la base no cambió?). Nada para commitear."
           else
             git commit -m "Backup $(date -u +'%F %T') UTC"
-            git push
+            git push -u origin main
           fi
