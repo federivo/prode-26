@@ -1,0 +1,87 @@
+# Backup diario de la base de datos a un repo privado aparte.
+#
+# Por qué un repo aparte: si el proyecto de Supabase se cae, el backup tiene que
+# vivir en otro lado. El plan free de Supabase no hace backups automáticos.
+#
+# Configurá en ESTE repo (Settings → Secrets and variables → Actions → New repository secret):
+#   DATABASE_URL        = connection string del SESSION POOLER de Supabase.
+#                         OJO: en free tier la conexión directa (db.<ref>.supabase.co)
+#                         es solo IPv6 y los runners de GitHub son IPv4, así que NO sirve.
+#                         Usá el "Session pooler" (Dashboard → Settings → Database →
+#                         Connection string → pestaña "Session pooler"). Tiene esta forma:
+#                         postgresql://postgres.<ref>:<PASSWORD>@aws-0-<region>.pooler.supabase.com:5432/postgres
+#   BACKUP_REPO_TOKEN   = fine-grained PAT con permiso Contents: Read and write
+#                         SOLO sobre el repo de backups (ver REPO_BACKUPS abajo).
+#                         Se crea en https://github.com/settings/personal-access-tokens
+name: Backup de la base
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # todos los días 06:00 UTC (03:00 en Argentina)
+  workflow_dispatch: {} # permite correrlo a mano
+
+env:
+  # Repo privado donde se guardan los dumps. Crealo vacío antes de correr esto.
+  REPO_BACKUPS: federivo/prode-26-backups
+  RETENER: 30 # cuántos dumps conservar (se borran los más viejos)
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar que los secrets estén configurados
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_REPO_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$BACKUP_REPO_TOKEN" ]; then
+            echo "::error::Faltan los secrets DATABASE_URL y/o BACKUP_REPO_TOKEN."
+            echo "Agregalos en Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Instalar pg_dump (postgresql-client 17)
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Clonar el repo de backups
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.REPO_BACKUPS }}
+          token: ${{ secrets.BACKUP_REPO_TOKEN }}
+          path: backups
+
+      - name: Generar el dump
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          mkdir -p backups/dumps
+          # --no-owner / --no-privileges: para poder restaurar en un proyecto nuevo
+          # sin chocar con roles que no existan. /usr/lib/postgresql/17/bin para
+          # asegurar que use el cliente 17 recién instalado.
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
+            --no-owner --no-privileges \
+            | gzip > "backups/dumps/prode-$TS.sql.gz"
+          echo "Dump generado: prode-$TS.sql.gz ($(du -h backups/dumps/prode-$TS.sql.gz | cut -f1))"
+
+      - name: Borrar los dumps más viejos (conservar los últimos $RETENER)
+        run: |
+          cd backups/dumps
+          ls -1t prode-*.sql.gz | tail -n +$((RETENER + 1)) | xargs -r rm --
+
+      - name: Commit y push al repo de backups
+        run: |
+          cd backups
+          git config user.name "backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          git add dumps
+          if git diff --cached --quiet; then
+            echo "Sin cambios (¿la base no cambió?). Nada para commitear."
+          else
+            git commit -m "Backup $(date -u +'%F %T') UTC"
+            git push
+          fi
