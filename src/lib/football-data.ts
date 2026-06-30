@@ -48,6 +48,11 @@ function mapWinner(w: string | null | undefined): MatchWinner | null {
   return null;
 }
 
+interface FDScorePair {
+  home: number | null;
+  away: number | null;
+}
+
 interface FDMatch {
   id: number;
   utcDate: string;
@@ -57,8 +62,47 @@ interface FDMatch {
   awayTeam: { name: string | null } | null;
   score: {
     winner: string | null;
-    fullTime: { home: number | null; away: number | null };
+    // REGULAR | EXTRA_TIME | PENALTY_SHOOTOUT
+    duration?: string | null;
+    // En partidos por penales, fullTime SUMA los penales (p. ej. 5-4). El
+    // marcador real del partido (1-1) está en regularTime + extraTime.
+    fullTime: FDScorePair;
+    regularTime?: FDScorePair | null;
+    extraTime?: FDScorePair | null;
+    penalties?: FDScorePair | null;
   };
+}
+
+/**
+ * Marcador "de fútbol" del partido, sin penales. football-data.org mete la
+ * tanda de penales dentro de `fullTime` (1-1 + 4-3 → 5-4); para el prode el
+ * resultado de un cruce definido por penales es el empate al final del tiempo
+ * suplementario (regularTime + extraTime). Los partidos definidos en el alargue
+ * (sin penales) ya vienen bien en fullTime, así que solo ajustamos la tanda.
+ */
+function resultScore(score: FDMatch["score"]): FDScorePair {
+  if (score.duration === "PENALTY_SHOOTOUT") {
+    const reg = score.regularTime;
+    if (reg && reg.home !== null && reg.away !== null) {
+      const et = score.extraTime;
+      return {
+        home: reg.home + (et?.home ?? 0),
+        away: reg.away + (et?.away ?? 0),
+      };
+    }
+    // Fallback: si no vino el desglose, restamos los penales de fullTime.
+    const { fullTime: ft, penalties: pen } = score;
+    if (
+      ft.home !== null &&
+      ft.away !== null &&
+      pen &&
+      pen.home !== null &&
+      pen.away !== null
+    ) {
+      return { home: ft.home - pen.home, away: ft.away - pen.away };
+    }
+  }
+  return { home: score.fullTime.home, away: score.fullTime.away };
 }
 
 // Omitimos predictions_open y manual_result: los maneja el admin, la sync no
@@ -71,6 +115,7 @@ function toRow(m: FDMatch): MatchRow {
   // Guardamos el marcador también en vivo (con la demora del free tier) para
   // mostrarlo. El ganador y los puntos solo cuando el partido termina.
   const hasScore = finished || status === "IN_PLAY";
+  const score = resultScore(m.score);
   return {
     external_id: m.id,
     stage: STAGE_MAP[m.stage] ?? "GROUP",
@@ -78,8 +123,8 @@ function toRow(m: FDMatch): MatchRow {
     away_team: m.awayTeam?.name ?? null,
     kickoff: m.utcDate,
     status,
-    home_score: hasScore ? m.score.fullTime.home : null,
-    away_score: hasScore ? m.score.fullTime.away : null,
+    home_score: hasScore ? score.home : null,
+    away_score: hasScore ? score.away : null,
     winner: finished ? mapWinner(m.score.winner) : null,
     updated_at: new Date().toISOString(),
   };
