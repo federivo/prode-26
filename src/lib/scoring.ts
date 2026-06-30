@@ -29,8 +29,10 @@ export interface MatchResult {
   homeScore: number;
   awayScore: number;
   /**
-   * Ganador oficial. En eliminatorias definidas por penales refleja al que
-   * avanza. Si no se pasa, se deriva del marcador.
+   * Ganador oficial del cruce (en eliminatorias por penales, el que avanza).
+   * NO se usa para el puntaje: el resultado se computa siempre a partir del
+   * marcador. Un 1-1 definido por penales puntúa como empate. Se mantiene por
+   * compatibilidad con los callers.
    */
   winner?: MatchWinner | null;
 }
@@ -42,8 +44,9 @@ export interface PredictionInput {
 
 /**
  * Calcula los puntos de un pronóstico contra el resultado final del partido.
- * El acierto exacto compara el marcador a tiempo completo; el acierto de
- * resultado usa el ganador oficial (incluye penales en eliminatorias).
+ * Tanto el acierto exacto como el de resultado usan el marcador (a tiempo
+ * completo o tiempo extra). Los penales NO cuentan: un 1-1 definido por penales
+ * se evalúa como empate.
  */
 export function scorePrediction(
   prediction: PredictionInput,
@@ -55,8 +58,7 @@ export function scorePrediction(
   // Resultado exacto (ambos goles).
   if (exactHome && exactAway) return POINTS.EXACT;
 
-  const actualOutcome =
-    match.winner ?? outcomeFromScore(match.homeScore, match.awayScore);
+  const actualOutcome = outcomeFromScore(match.homeScore, match.awayScore);
   const predictedOutcome = outcomeFromScore(
     prediction.homeScore,
     prediction.awayScore,

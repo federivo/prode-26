@@ -67,7 +67,7 @@ describe("scorePrediction — sistema nuevo", () => {
   });
 });
 
-describe("scorePrediction — eliminatorias con penales", () => {
+describe("scorePrediction — eliminatorias con penales (no cuentan)", () => {
   it("marcador exacto 1-1 aunque haya penales → 10", () => {
     expect(
       scorePrediction(
@@ -77,23 +77,33 @@ describe("scorePrediction — eliminatorias con penales", () => {
     ).toBe(POINTS.EXACT);
   });
 
-  it("acierta al que avanza (penales) + goles de un lado → 7", () => {
-    // 90' 1-1, gana local por penales; predijo 2-1 (local, away 1==1)
+  it("un 1-1 definido por penales puntúa como empate, no como triunfo del que avanza", () => {
+    // 90'/ET 1-1, avanza local por penales; predijo otro empate (2-2) → acierta el resultado (empate)
+    expect(
+      scorePrediction(
+        { homeScore: 2, awayScore: 2 },
+        { stage: "SEMI_FINAL", homeScore: 1, awayScore: 1, winner: "HOME" },
+      ),
+    ).toBe(POINTS.OUTCOME);
+  });
+
+  it("predecir al que avanza por penales NO acierta el resultado (es empate)", () => {
+    // 90'/ET 1-1, avanza local por penales; predijo 2-1 (local) → erró el empate, pero away 1==1 → 2
     expect(
       scorePrediction(
         { homeScore: 2, awayScore: 1 },
         { stage: "SEMI_FINAL", homeScore: 1, awayScore: 1, winner: "HOME" },
       ),
-    ).toBe(POINTS.OUTCOME_ONE_SIDE);
+    ).toBe(POINTS.ONE_SIDE);
   });
 
-  it("acierta al que avanza (penales), sin goles → 5", () => {
-    // 90' 1-1, gana local por penales; predijo 2-0
+  it("predijo triunfo del que avanza sin coincidir goles → 0", () => {
+    // 90'/ET 1-1, avanza local por penales; predijo 2-0 → erró el empate y ningún lado coincide
     expect(
       scorePrediction(
         { homeScore: 2, awayScore: 0 },
         { stage: "SEMI_FINAL", homeScore: 1, awayScore: 1, winner: "HOME" },
       ),
-    ).toBe(POINTS.OUTCOME);
+    ).toBe(POINTS.NONE);
   });
 });
